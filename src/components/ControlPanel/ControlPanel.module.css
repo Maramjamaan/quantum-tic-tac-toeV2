@@ -1,0 +1,399 @@
+/* Control Panel Styles */
+
+.control-panel {
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.panel-header {
+  text-align: center;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 16px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Status Section */
+.status-section {
+  margin-bottom: 24px;
+}
+
+.status-card {
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid;
+  transition: all 0.3s ease;
+}
+
+.status-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.status-card p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.status-card.playing {
+  background: #f0f9ff;
+  border-color: #0ea5e9;
+  color: #0c4a6e;
+}
+
+.status-card.collapse-pending {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #7f1d1d;
+  animation: urgent-pulse 2s infinite;
+}
+
+.status-card.game-over {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  color: #14532d;
+}
+
+@keyframes urgent-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.cycle-info {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px !important;
+  margin-top: 8px;
+}
+
+/* Collapse Section */
+.collapse-section-wrapper {
+  background: #fef2f2;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 2px solid #fecaca;
+}
+
+.collapse-section h4 {
+  margin: 0 0 16px 0;
+  color: #dc2626;
+  font-size: 16px;
+}
+
+.collapse-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.collapse-option {
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.collapse-option:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.option-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.option-header h5 {
+  margin: 0;
+  color: #374151;
+  font-size: 14px;
+}
+
+.option-score {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.option-assignments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.assignment {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  color: #374151;
+}
+
+.choose-btn {
+  width: 100%;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.choose-btn:hover {
+  background: #2563eb;
+}
+
+.auto-collapse-section {
+  text-align: center;
+  padding-top: 12px;
+  border-top: 1px solid #fecaca;
+}
+
+/* Controls Section */
+.controls-section {
+  margin-bottom: 24px;
+}
+
+.controls-section h4,
+.demo-section h4 {
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.controls-grid,
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.control-btn,
+.demo-btn,
+.auto-btn {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.control-btn:hover,
+.demo-btn:hover,
+.auto-btn:hover {
+  border-color: #3b82f6;
+  color: #1e40af;
+  background: #f8fafc;
+}
+
+.control-btn:disabled,
+.demo-btn:disabled,
+.auto-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reset-btn {
+  background: #ef4444;
+  color: white;
+  border-color: #dc2626;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.auto-btn {
+  background: #8b5cf6;
+  color: white;
+  border-color: #7c3aed;
+}
+
+.auto-btn:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+/* Demo Section */
+.demo-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.demo-btn {
+  background: #f59e0b;
+  color: white;
+  border-color: #d97706;
+}
+
+.demo-btn:hover:not(:disabled) {
+  background: #d97706;
+}
+
+/* Statistics Section */
+.stats-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+}
+
+.stats-section h4 {
+  margin: 0 0 12px 0;
+  color: #0c4a6e;
+  font-size: 14px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: white;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.stat-label {
+  color: #475569;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Debug Section */
+.debug-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #1f2937;
+  color: #f9fafb;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.debug-section h4 {
+  margin: 0 0 12px 0;
+  color: #f9fafb;
+  font-size: 14px;
+}
+
+.debug-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.debug-grid div {
+  font-size: 11px;
+  padding: 2px 0;
+}
+
+/* Help Section */
+.help-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.help-section details {
+  cursor: pointer;
+}
+
+.help-section summary {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  padding: 8px 0;
+  user-select: none;
+}
+
+.help-section summary:hover {
+  color: #374151;
+}
+
+.help-content {
+  padding: 8px 0;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.help-content ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.help-content li {
+  margin-bottom: 4px;
+}
+
+.help-content strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .control-panel {
+    padding: 16px;
+    max-width: none;
+  }
+  
+  .controls-grid,
+  .demo-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .collapse-options {
+    gap: 8px;
+  }
+  
+  .option-assignments {
+    justify-content: center;
+  }
+}
