@@ -1,6 +1,6 @@
 /**
  * Game State Management Hook for Quantum Tic-Tac-Toe
- * Central state management with all game logic integration
+ * Connected to Python Quantum Backend via API
  */
 
 import { useState, useCallback, useEffect } from 'react';
@@ -8,40 +8,96 @@ import {
   PLAYERS,
   GAME_STATUS,
   SQUARE_STATES,
-  createGameState,
-  isValidQuantumMove
+  createGameState
 } from '../types/gameTypes.js';
-import {
-  canMakeQuantumMove,
-  makeQuantumMove,
-  makeClassicalMove,
-  buildBoard,
-  checkWinner,
-  updateStatus,
-  getStats
-} from '../utils/gameLogic.js';
-import { detectCycle } from '../utils/entanglementDetector.js';
-import {
-  generateCollapseOptions,
-  applyCollapse,
-  getBestOption,
-  evaluateOption
-} from '../utils/collapseEngine.js';
+import { useQuantumAPI } from './useQuantumAPI.js';
+
+// Helper to build board from Python API response
+const buildBoardFromAPI = (apiGameState) => {
+  const board = Array(9).fill().map(() => ({
+    quantumMoveIds: [],
+    classicalMoveId: null,
+    state: SQUARE_STATES.EMPTY
+  }));
+
+  // Add quantum moves
+  if (apiGameState.moves) {
+    apiGameState.moves.forEach(move => {
+      if (!move.collapsed) {
+        move.squares.forEach(sq => {
+          board[sq].quantumMoveIds.push(move.move_id);
+          board[sq].state = SQUARE_STATES.QUANTUM;
+        });
+      }
+    });
+  }
+
+  // Add classical moves (collapsed or direct)
+  if (apiGameState.board) {
+    apiGameState.board.forEach((player, index) => {
+      if (player) {
+        board[index].classicalMoveId = player;
+        board[index].state = SQUARE_STATES.CLASSICAL;
+        board[index].quantumMoveIds = [];
+      }
+    });
+  }
+
+  return board;
+};
+
+// Calculate stats from game state
+const calculateStats = (apiGameState) => {
+  const quantumMoves = apiGameState.moves?.filter(m => !m.collapsed).length || 0;
+  const classicalMoves = apiGameState.moves?.filter(m => m.collapsed).length || 0;
+  const entanglements = apiGameState.entanglements?.length || 0;
+  
+  const board = apiGameState.board || [];
+  const emptySquares = board.filter(sq => sq === null).length;
+  const classicalSquares = board.filter(sq => sq !== null).length;
+  const quantumSquares = 9 - emptySquares - classicalSquares;
+
+  return {
+    totalMoves: quantumMoves + classicalMoves,
+    quantumMoves,
+    classicalMoves,
+    entanglements,
+    emptySquares,
+    quantumSquares,
+    classicalSquares
+  };
+};
 
 export const useGameState = () => {
+  const api = useQuantumAPI();
+  
   const [gameState, setGameState] = useState(createGameState());
   const [selectedSquares, setSelectedSquares] = useState([]);
   const [lastAction, setLastAction] = useState(null);
+  const [apiGameState, setApiGameState] = useState(null);
 
   // Get current board representation
-  const board = buildBoard(gameState);
-  const stats = getStats(gameState);
+  const board = apiGameState ? buildBoardFromAPI(apiGameState) : Array(9).fill().map(() => ({
+    quantumMoveIds: [],
+    classicalMoveId: null,
+    state: SQUARE_STATES.EMPTY
+  }));
+
+  const stats = apiGameState ? calculateStats(apiGameState) : {
+    totalMoves: 0,
+    quantumMoves: 0,
+    classicalMoves: 0,
+    entanglements: 0,
+    emptySquares: 9,
+    quantumSquares: 0,
+    classicalSquares: 0
+  };
 
   // Handle square selection for quantum moves
   const selectSquare = useCallback((square) => {
     if (gameState.status !== GAME_STATUS.PLAYING) return;
     
-    // Check if square is already classical (can't select)
+    // Check if square is already classical
     const squareData = board[square];
     if (squareData.state === SQUARE_STATES.CLASSICAL) {
       setLastAction({ type: 'error', message: 'Cannot select collapsed square' });
@@ -52,228 +108,173 @@ export const useGameState = () => {
     const existingIndex = newSelection.indexOf(square);
 
     if (existingIndex >= 0) {
-      // Deselect if already selected
+      // Deselect
       newSelection.splice(existingIndex, 1);
     } else if (newSelection.length < 2) {
-      // Add to selection if room available
+      // Add to selection
       newSelection.push(square);
     } else {
-      // Replace first selected with new one
+      // Replace first with new
       newSelection[0] = newSelection[1];
       newSelection[1] = square;
     }
 
     setSelectedSquares(newSelection);
     
-    // Auto-execute move if 2 squares selected
+    // Auto-execute if 2 selected
     if (newSelection.length === 2) {
       executeQuantumMove(newSelection);
     }
   }, [gameState, selectedSquares, board]);
 
-  // Execute a quantum move
-  const executeQuantumMove = useCallback((squares) => {
-    if (!canMakeQuantumMove(gameState, squares, gameState.currentPlayer)) {
+  // Execute quantum move via API
+  const executeQuantumMove = useCallback(async (squares) => {
+    if (squares.length !== 2) return;
+
+    console.log('Making quantum move:', squares);
+    
+    const result = await api.makeQuantumMove(squares[0], squares[1]);
+    
+    if (result && result.success) {
+      console.log('Move successful:', result);
+      setApiGameState(result.game_state);
+      
+      // Update local game state
+      setGameState(prev => ({
+        ...prev,
+        currentPlayer: result.game_state.current_player,
+        status: result.cycle_detected ? GAME_STATUS.WAITING_COLLAPSE : GAME_STATUS.PLAYING
+      }));
+      
+      setSelectedSquares([]);
+      
+      if (result.cycle_detected) {
+        setLastAction({ 
+          type: 'cycle_detected',
+          message: 'Cycle detected! Choose how to collapse'
+        });
+      } else {
+        setLastAction({ 
+          type: 'quantum_move',
+          moveId: result.move.move_id,
+          squares 
+        });
+      }
+    } else {
       setLastAction({ 
         type: 'error', 
-        message: 'Invalid quantum move' 
+        message: 'Failed to make move' 
       });
-      return;
-    }
-
-    const newState = makeQuantumMove(gameState, squares, gameState.currentPlayer);
-    if (!newState) {
-      setLastAction({ type: 'error', message: 'Failed to make move' });
-      return;
-    }
-
-    // Check for new cycles
-    const lastMove = newState.quantumMoves[newState.quantumMoves.length - 1];
-    const cycle = detectCycle(newState.entanglements, lastMove.id);
-
-    if (cycle) {
-      // Generate collapse options
-      const options = generateCollapseOptions(cycle, newState);
-      const updatedState = {
-        ...newState,
-        status: GAME_STATUS.WAITING_COLLAPSE,
-        pendingCycle: cycle,
-        collapseOptions: options
-      };
-      
-      setGameState(updatedState);
       setSelectedSquares([]);
-      setLastAction({ 
-        type: 'cycle_detected', 
-        cycle,
-        choosingPlayer: cycle.getCollapsePlayer()
-      });
-    } else {
-      // No cycle - update status and continue
-      const finalState = updateStatus(newState);
-      setGameState(finalState);
-      setSelectedSquares([]);
-      setLastAction({ 
-        type: 'quantum_move', 
-        moveId: lastMove.id,
-        squares 
-      });
     }
-  }, [gameState]);
-
-  // Execute classical move (mainly for testing)
-  const executeClassicalMove = useCallback((square, player) => {
-    const newState = makeClassicalMove(gameState, square, player);
-    if (!newState) return false;
-
-    const finalState = updateStatus(newState);
-    setGameState(finalState);
-    setLastAction({ type: 'classical_move', square, player });
-    return true;
-  }, [gameState]);
+  }, [api]);
 
   // Choose collapse option
-  const chooseCollapse = useCallback((option) => {
-    if (gameState.status !== GAME_STATUS.WAITING_COLLAPSE || !gameState.pendingCycle) {
-      setLastAction({ type: 'error', message: 'No collapse pending' });
-      return;
-    }
-
-    const newState = applyCollapse(gameState, option);
-    const finalState = updateStatus(newState);
+  const chooseCollapse = useCallback(async (option) => {
+    console.log('Collapsing with option:', option);
     
-    setGameState(finalState);
-    setLastAction({ 
-      type: 'collapse_applied', 
-      option,
-      impact: option.assignments.size 
-    });
-  }, [gameState]);
-
-  // Auto-choose best collapse option (for AI or quick play)
-  const autoCollapse = useCallback(() => {
-    if (gameState.status !== GAME_STATUS.WAITING_COLLAPSE) return;
-
-    const choosingPlayer = gameState.pendingCycle.getCollapsePlayer();
-    const bestOption = getBestOption(
-      gameState.collapseOptions, 
-      choosingPlayer, 
-      gameState
-    );
-
-    if (bestOption) {
-      chooseCollapse(bestOption);
-    }
-  }, [gameState, chooseCollapse]);
-
-  // Clear current selection
-  const clearSelection = useCallback(() => {
-    setSelectedSquares([]);
-    setLastAction({ type: 'selection_cleared' });
-  }, []);
-
-  // Reset game to initial state
-  const resetGame = useCallback(() => {
-    setGameState(createGameState());
-    setSelectedSquares([]);
-    setLastAction({ type: 'game_reset' });
-  }, []);
-
-  // Undo last move (for testing/development)
-  const undoMove = useCallback(() => {
-    // This would require maintaining move history
-    // For now, just clear selections
-    clearSelection();
-    setLastAction({ type: 'undo_attempted' });
-  }, [clearSelection]);
-
-  // Get available moves for current player
-  const getAvailableMoves = useCallback(() => {
-    if (gameState.status !== GAME_STATUS.PLAYING) return [];
-
-    const available = [];
+    // For now, get all move IDs from API game state
+    const moveIds = apiGameState?.moves?.map(m => m.move_id) || [];
     
-    // Check all possible 2-square combinations
-    for (let i = 0; i < 9; i++) {
-      for (let j = i + 1; j < 9; j++) {
-        if (canMakeQuantumMove(gameState, [i, j], gameState.currentPlayer)) {
-          available.push([i, j]);
-        }
+    const result = await api.collapseMove(moveIds);
+    
+    if (result && result.success) {
+      console.log('Collapse successful:', result);
+      setApiGameState(result.game_state);
+      
+      setGameState(prev => ({
+        ...prev,
+        status: GAME_STATUS.PLAYING
+      }));
+      
+      setLastAction({ 
+        type: 'collapse_applied',
+        results: result.collapse_results
+      });
+    }
+  }, [api, apiGameState]);
+
+  // Auto-collapse (just collapse all for now)
+  const autoCollapse = useCallback(async () => {
+    const moveIds = apiGameState?.moves?.map(m => m.move_id) || [];
+    
+    if (moveIds.length > 0) {
+      const result = await api.collapseMove(moveIds);
+      
+      if (result && result.success) {
+        setApiGameState(result.game_state);
+        setGameState(prev => ({
+          ...prev,
+          status: GAME_STATUS.PLAYING
+        }));
       }
     }
+  }, [api, apiGameState]);
 
-    return available;
-  }, [gameState]);
+  // Clear selection
+  const clearSelection = useCallback(() => {
+    setSelectedSquares([]);
+  }, []);
 
-  // Check if a specific move is valid
-  const isMoveValid = useCallback((squares) => {
-    return isValidQuantumMove(squares) && 
-           canMakeQuantumMove(gameState, squares, gameState.currentPlayer);
-  }, [gameState]);
+  // Reset game
+  const resetGame = useCallback(async () => {
+    console.log('Resetting game...');
+    
+    const result = await api.resetGame();
+    
+    if (result && result.success) {
+      console.log('Game reset:', result);
+      setApiGameState(result.game_state);
+      setGameState(createGameState());
+      setSelectedSquares([]);
+      setLastAction({ type: 'game_reset' });
+    }
+  }, [api]);
 
-  // Get move suggestions (simple AI)
-  const getMoveSuggestions = useCallback(() => {
-    const availableMoves = getAvailableMoves();
-    if (availableMoves.length === 0) return [];
-
-    // Score each move roughly
-    const scoredMoves = availableMoves.map(squares => {
-      let score = 0;
-      
-      // Prefer center squares
-      if (squares.includes(4)) score += 3;
-      
-      // Prefer corners
-      const corners = [0, 2, 6, 8];
-      score += squares.filter(sq => corners.includes(sq)).length * 2;
-      
-      // Prefer moves that create entanglements (more complex)
-      const currentBoard = buildBoard(gameState);
-      squares.forEach(sq => {
-        if (currentBoard[sq].quantumMoveIds && currentBoard[sq].quantumMoveIds.length > 0) {
-          score += 1;
-        }
-      });
-
-      return { squares, score };
-    });
-
-    // Sort by score and return top 3
-    return scoredMoves
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3)
-      .map(item => item.squares);
-  }, [gameState, getAvailableMoves]);
-
-  // Auto-play functionality (for testing)
+  // Auto-play (simple random move)
   const autoPlay = useCallback(() => {
     if (gameState.status === GAME_STATUS.WAITING_COLLAPSE) {
       autoCollapse();
     } else if (gameState.status === GAME_STATUS.PLAYING) {
-      const suggestions = getMoveSuggestions();
-      if (suggestions.length > 0) {
-        const randomMove = suggestions[Math.floor(Math.random() * suggestions.length)];
-        selectSquare(randomMove[0]);
-        setTimeout(() => selectSquare(randomMove[1]), 100);
+      // Find available squares
+      const available = [];
+      board.forEach((sq, idx) => {
+        if (sq.state !== SQUARE_STATES.CLASSICAL) {
+          available.push(idx);
+        }
+      });
+      
+      if (available.length >= 2) {
+        const square1 = available[Math.floor(Math.random() * available.length)];
+        let square2;
+        do {
+          square2 = available[Math.floor(Math.random() * available.length)];
+        } while (square2 === square1);
+        
+        executeQuantumMove([square1, square2]);
       }
     }
-  }, [gameState.status, autoCollapse, getMoveSuggestions, selectSquare]);
+  }, [gameState.status, board, autoCollapse, executeQuantumMove]);
 
-  // Effect to auto-clear last action after delay
+  // Load initial game state on mount
+  useEffect(() => {
+    const loadGameState = async () => {
+      const result = await api.getGameState();
+      if (result && result.success) {
+        setApiGameState(result.game_state);
+      }
+    };
+    
+    loadGameState();
+  }, []);
+
+  // Clear error messages after delay
   useEffect(() => {
     if (lastAction && lastAction.type === 'error') {
       const timer = setTimeout(() => setLastAction(null), 3000);
       return () => clearTimeout(timer);
     }
   }, [lastAction]);
-
-  // Debug info (remove in production)
-  const debugInfo = {
-    entanglements: gameState.entanglements ? gameState.entanglements.length : 0,
-    pendingCycle: !!gameState.pendingCycle,
-    collapseOptions: gameState.collapseOptions ? gameState.collapseOptions.length : 0,
-    lastAction: lastAction?.type
-  };
 
   return {
     // Core state
@@ -286,21 +287,13 @@ export const useGameState = () => {
     // Actions
     selectSquare,
     executeQuantumMove,
-    executeClassicalMove,
     chooseCollapse,
     autoCollapse,
     clearSelection,
     resetGame,
-    undoMove,
-
-    // Queries
-    getAvailableMoves,
-    isMoveValid,
-    getMoveSuggestions,
 
     // Utilities
     autoPlay,
-    debugInfo,
 
     // Computed properties
     isPlaying: gameState.status === GAME_STATUS.PLAYING,
@@ -308,8 +301,12 @@ export const useGameState = () => {
     isGameOver: gameState.status === GAME_STATUS.X_WINS || 
                 gameState.status === GAME_STATUS.O_WINS || 
                 gameState.status === GAME_STATUS.DRAW,
-    currentPlayer: gameState.currentPlayer,
+    currentPlayer: apiGameState?.current_player || PLAYERS.X,
     winner: gameState.winner,
-    winningLine: gameState.winningLine
+    winningLine: gameState.winningLine || [],
+    
+    // API status
+    loading: api.loading,
+    error: api.error
   };
 };

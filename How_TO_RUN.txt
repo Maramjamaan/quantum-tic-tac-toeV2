@@ -1,0 +1,23 @@
+# How to Run Quantum Tic-Tac-Toe
+
+## Setup
+
+### Backend (Python)
+```bash
+cd python
+pip install -r requirements.txt
+python api.py
+```
+
+### Frontend (React)
+```bash
+npm install
+npm start
+```
+
+## Play
+1. Backend runs on: http://localhost:8000
+2. Frontend runs on: http://localhost:3000
+3. Open browser to http://localhost:3000
+4. Click 2 squares to make quantum moves
+5. Enjoy!
