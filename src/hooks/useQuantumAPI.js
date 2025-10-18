@@ -32,7 +32,7 @@ export const useQuantumAPI = () => {
     }
   };
 
-  const collapseMove = async (moveIds) => {
+  const collapseMove = async (collapseOption) => {
     setLoading(true);
     setError(null);
     
@@ -40,7 +40,7 @@ export const useQuantumAPI = () => {
       const response = await fetch(`${API_URL}/game/collapse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ move_ids: moveIds })
+        body: JSON.stringify({ collapse_option: collapseOption })
       });
       
       if (!response.ok) {
@@ -89,12 +89,27 @@ export const useQuantumAPI = () => {
       return null;
     }
   };
-
+const checkWinner = async () => {
+    try {
+      const response = await fetch(`${API_URL}/game/winner`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to check winner');
+      }
+      
+      return await response.json();
+    } catch (err) {
+      console.error('Check Winner Error:', err);
+      setError(err.message);
+      return null;
+    }
+  };
   return { 
     makeQuantumMove, 
     collapseMove, 
     resetGame, 
     getGameState,
+    checkWinner,
     loading, 
     error 
   };

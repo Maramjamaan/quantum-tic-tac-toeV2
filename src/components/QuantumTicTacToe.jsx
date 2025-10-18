@@ -111,25 +111,28 @@ const ControlPanel = ({
     if (isGameOver) {
       return (
         <div className="status-card game-over">
-          <h3>🎉 Game Over!</h3>
+          <h3> Game Over!</h3>
           <p>{winner ? `Player ${winner} Wins!` : "It's a Draw!"}</p>
         </div>
       );
     }
 
     if (isWaitingCollapse) {
-      const choosingPlayer = gameState.pendingCycle?.getCollapsePlayer();
       return (
-        <div className="status-card collapse-pending">
-          <h3>🌀 Quantum Collapse!</h3>
-          <p>Player {choosingPlayer} must choose how to collapse the cycle</p>
+       <div className="status-card collapse-pending">
+          <h3> Quantum Collapse!</h3>
+          <p>A cycle was detected in the entanglement graph!</p>
+          <p><strong>Player {gameState.currentPlayer}</strong>, choose how to collapse the quantum moves.</p>
+          <p style={{fontSize: '0.8rem', color: '#666'}}>
+            (Your opponent created the cycle, so YOU get to choose!)
+          </p>
         </div>
       );
     }
 
     return (
       <div className="status-card playing">
-        <h3>🎮 Game in Progress</h3>
+        <h3> Game in Progress</h3>
         <p>Current Player: <strong>{gameState.currentPlayer}</strong></p>
         <p>Move #{gameState.moveCount + 1}</p>
       </div>
@@ -138,23 +141,31 @@ const ControlPanel = ({
 
   const renderCollapseOptions = () => {
     if (!isWaitingCollapse || !gameState.collapseOptions || gameState.collapseOptions.length === 0) {
-      return null;
+      return (
+        <div className="no-options">
+          <p style={{textAlign: 'center', color: '#666', padding: '1rem'}}>
+            Generating collapse options...
+          </p>
+        </div>
+      );
     }
 
     return (
       <div className="collapse-section">
-        <h4>Choose Collapse Option:</h4>
+        <h4>Choose Collapse Configuration:</h4>
+        <p style={{fontSize: '0.85rem', color: '#666', marginBottom: '1rem'}}>
+          Each option shows where quantum moves will collapse to classical positions:
+        </p>
         <div className="collapse-options">
           {gameState.collapseOptions.map((option, index) => (
-            <div key={option.id} className="collapse-option">
+            <div key={index} className="collapse-option">
               <div className="option-header">
                 <h5>Option {index + 1}</h5>
-                <span className="option-score">Score: {option.score}</span>
               </div>
               <div className="option-assignments">
-                {Array.from(option.assignments.entries()).map(([moveId, square]) => (
+                {Object.entries(option).map(([moveId, square]) => (
                   <div key={moveId} className="assignment">
-                    {moveId} → Square {square + 1}
+                    <strong>{moveId}</strong> collapses to square <strong>{square + 1}</strong>
                   </div>
                 ))}
               </div>
@@ -162,16 +173,12 @@ const ControlPanel = ({
                 className="choose-btn"
                 onClick={() => chooseCollapse(option)}
               >
-                Choose This Option
+                 Choose This
               </button>
             </div>
           ))}
         </div>
-        <div className="auto-collapse-section">
-          <button className="auto-btn" onClick={autoCollapse}>
-            🤖 Auto-Choose Best Option
-          </button>
-        </div>
+    
       </div>
     );
   };
@@ -179,7 +186,7 @@ const ControlPanel = ({
   return (
     <div className="control-panel">
       <div className="panel-header">
-        <h2>🎮 Control Panel</h2>
+        <h2> Control Panel</h2>
       </div>
 
       <section className="status-section">
@@ -193,15 +200,15 @@ const ControlPanel = ({
       )}
 
       <section className="controls-section">
-        <h4>🎛️ Game Controls</h4>
+        <h4>Game Controls</h4>
         <div className="controls-grid">
           <button className="control-btn reset-btn" onClick={resetGame}>
-            🔄 Reset Game
+             Reset Game
           </button>
           <button 
             className="control-btn auto-btn" 
             onClick={autoPlay}
-            disabled={isGameOver}
+            disabled={isGameOver || isWaitingCollapse}
           >
             🤖 Auto Play
           </button>
@@ -245,7 +252,7 @@ const ControlPanel = ({
             <ol>
               <li><strong>Quantum Moves:</strong> Select 2 squares for each move</li>
               <li><strong>Entanglement:</strong> Sharing squares creates quantum entanglement</li>
-              <li><strong>Cycles:</strong> When entanglements form loops, collapse occurs</li>
+              <li><strong>Cycles:</strong> When entanglements form loops, you must choose how to collapse</li>
               <li><strong>Winning:</strong> Get 3 classical marks in a row to win</li>
             </ol>
           </div>
@@ -284,13 +291,15 @@ const QuantumTicTacToe = () => {
                   <li><strong>Superposition:</strong> Each move exists in 2 squares simultaneously</li>
                   <li><strong>Entanglement:</strong> Moves sharing squares become correlated</li>
                   <li><strong>Measurement:</strong> Forces quantum moves to collapse to classical</li>
+                  <li><strong>Cycles:</strong> Closed loops in entanglements trigger collapse</li>
                 </ul>
               </div>
               <div className="instruction-column">
                 <h4>🎮 Game Rules</h4>
                 <ul>
                   <li>Select exactly 2 squares for each quantum move</li>
-                  <li>When entanglements form cycles, choose how to collapse</li>
+                  <li>Moves sharing squares create entanglement</li>
+                  <li>When cycles form (e.g., A→B→C→A), choose how to collapse</li>
                   <li>Only classical marks count toward winning</li>
                   <li>First to get 3 classical marks in a row wins!</li>
                 </ul>

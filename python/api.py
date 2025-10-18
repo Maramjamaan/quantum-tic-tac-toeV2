@@ -68,13 +68,13 @@ class QuantumMoveRequest(BaseModel):
 
 
 class CollapseMoveRequest(BaseModel):
-    """Request to collapse quantum moves"""
-    move_ids: List[str]
+    """Request to collapse quantum moves with specific squares"""
+    collapse_option: Dict[str, int]  # {"X1": 1, "O2": 5, "X3": 9}
     
     class Config:
         json_schema_extra = {
             "example": {
-                "move_ids": ["X1", "O1"]
+                "collapse_option": {"X1": 1, "O1": 5}
             }
         }
 
@@ -201,11 +201,11 @@ def make_quantum_move(request: QuantumMoveRequest):
 @app.post("/game/collapse")
 def collapse_moves(request: CollapseMoveRequest):
     """
-    Collapse quantum moves to classical positions
-    Uses real quantum measurement
+    Collapse quantum moves to chosen classical positions
     
     Args:
-        move_ids: List of move IDs to collapse (e.g., ["X1", "O1"])
+        collapse_option: Dictionary mapping move IDs to chosen squares
+                        Example: {"X1": 1, "O2": 5, "X3": 9}
     
     Returns:
         Collapse results showing final positions
@@ -213,16 +213,16 @@ def collapse_moves(request: CollapseMoveRequest):
     try:
         game = get_game()
         
-        if not request.move_ids:
+        if not request.collapse_option:
             raise HTTPException(
                 status_code=400,
-                detail="Must provide at least one move ID"
+                detail="Must provide collapse option"
             )
         
-        # Collapse the moves
-        result = game.collapse_moves(request.move_ids)
+        # Collapse the moves with chosen squares
+        result = game.collapse_with_choice(request.collapse_option)
         
-        logger.info(f"Moves collapsed: {request.move_ids}")
+        logger.info(f"Moves collapsed with choice: {request.collapse_option}")
         logger.info(f"Results: {result['collapse_results']}")
         
         return result
