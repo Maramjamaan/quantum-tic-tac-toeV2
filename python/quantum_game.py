@@ -177,27 +177,25 @@ class QuantumTicTacToe:
     def make_quantum_move(self, square1: int, square2: int) -> Dict[str, Any]:
         """
         Make a quantum move in two squares!
-        
-        This is called when a player clicks 2 squares.
-        
-        Args:
-            square1: First square (0-8)
-            square2: Second square (0-8)
-            
-        Returns:
-            Dictionary with:
-            - success: True/False
-            - move: The move that was created
-            - entanglements: New entanglements created
-            - cycle_detected: Whether a cycle was formed
-            - collapse_options: Options for how to collapse (if cycle detected)
-            - game_state: Complete game state
         """
+        # STEP 0: Check if game is already over
+        winner = self.check_winner()
+        is_draw = self.check_for_draw()
+        
+        if winner or is_draw:
+            return {
+                'success': False,
+                'error': 'Game is already over',
+                'winner': winner,
+                'is_draw': is_draw,
+                'game_state': self.game_state.to_dict()
+            }
+        
         # STEP 1: Check if the move is valid
         if not self._is_valid_quantum_move(square1, square2):
             return {
                 'success': False,
-                'error': 'Invalid quantum move',
+                'error': 'Invalid quantum move - squares may already be classical',
                 'game_state': self.game_state.to_dict()
             }
         
@@ -227,7 +225,7 @@ class QuantumTicTacToe:
         cycle_detected = self._check_for_cycles()
         
         # STEP 6: If cycle detected, generate collapse options
-      # If cycle detected, generate VALID collapse options
+        # If cycle detected, generate VALID collapse options
         collapse_options = []
         if cycle_detected:
             import random
@@ -266,28 +264,48 @@ class QuantumTicTacToe:
             # If we couldn't generate 3 options, that's ok - use what we have
             logger.info(f"Generated {len(collapse_options)} valid collapse options")
         
-        # STEP 7: Switch to other player
-        # If cycle detected, DON'T switch player yet!
-        # The OTHER player (not the one who triggered cycle) chooses collapse
-        if not cycle_detected:
-            # Normal move, switch player
+        
+        # STEP 7: Handle player switching and cycle logic
+        # Store who made this move (they would be the cycle creator if a cycle is detected)
+        move_maker = player  # The player who JUST made this move
+
+        if cycle_detected:
+            # The player who JUST MADE THIS MOVE created the cycle
+            cycle_creator = move_maker
+            
+            # The OTHER player (opponent) should choose the collapse
+            if cycle_creator == "X":
+                collapse_chooser = "O"
+            else:
+                collapse_chooser = "X"
+            
+            # Set current player to the one who will choose
+            self.game_state.current_player = collapse_chooser
+            
+            logger.info(f"=== CYCLE LOGIC ===")
+            logger.info(f"Move maker (cycle creator): {cycle_creator}")
+            logger.info(f"Collapse chooser (opponent): {collapse_chooser}")
+        else:
+            # Normal move, no cycle - just switch players
+            cycle_creator = None
+            collapse_chooser = None
+            # Switch to the other player for the next move
             self.game_state.current_player = "O" if player == "X" else "X"
-        # If cycle detected, current_player stays the same (they triggered it)
-        # So the OTHER player will be the one choosing collapse
-        
-        logger.info(f"Quantum move {move_id} placed in squares {square1} and {square2}")
-        
+
         # STEP 8: Return everything
         return {
             'success': True,
             'move': move.to_dict(),
             'entanglements': [e.to_dict() for e in new_entanglements],
             'cycle_detected': cycle_detected,
+            'cycle_creator': cycle_creator if cycle_detected else None,
+            'collapse_chooser': collapse_chooser if cycle_detected else None,
             'collapse_options': collapse_options,
             'game_state': self.game_state.to_dict()
         }
-    
-    
+      
+
+
     def collapse_moves(self, moves_to_collapse: List[str]) -> Dict[str, Any]:
         """
         Collapse quantum moves to classical positions.
@@ -610,7 +628,28 @@ class QuantumTicTacToe:
         
         return None  # No winner yet
     
-    
+    def check_for_draw(self) -> bool:
+        """
+        Check if the game is a draw.
+        Draw occurs when all squares have classical marks but no winner.
+        
+        Returns:
+            True if draw, False otherwise
+        """
+        board = self.game_state.board
+        
+        # Check if all squares are filled
+        all_filled = all(square is not None for square in board)
+        
+        if not all_filled:
+            return False  # Game can still continue
+        
+        # All squares filled, check if there's a winner
+        winner = self.check_winner()
+        
+        # If all filled and no winner, it's a draw
+        return winner is None
+
     def reset_game(self):
         """Reset game to initial state"""
         self.game_state = GameState()
@@ -642,7 +681,7 @@ if __name__ == "__main__":
     """
     game = create_game()
     
-    print("🎮 Quantum Tic-Tac-Toe Engine Test\n")
+    print("Quantum Tic-Tac-Toe Engine Test\n")
     
     # Player X makes first move
     result = game.make_quantum_move(0, 4)
@@ -662,10 +701,10 @@ if __name__ == "__main__":
     
     # If cycle detected, collapse
     if result['cycle_detected']:
-        print("\n🔄 Collapsing quantum moves...")
+        print("\n Collapsing quantum moves...")
         move_ids = [m['move_id'] for m in result['game_state']['moves']]
         collapse_result = game.collapse_moves(move_ids)
         print(f"Collapse results: {collapse_result['collapse_results']}")
         print(f"Board: {game.game_state.board}")
     
-    print("\n✅ Engine test complete!")
+    print("\n Engine test complete!")

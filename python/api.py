@@ -235,27 +235,24 @@ def collapse_moves(request: CollapseMoveRequest):
 @app.get("/game/winner")
 def check_winner():
     """
-    Check if there's a winner
-    Only collapsed (classical) moves count
-    
-    Returns:
-        Winner ('X' or 'O') or None if no winner yet
+    Check if there's a winner or a draw
     """
     try:
         game = get_game()
         winner = game.check_winner()
+        is_draw = game.check_for_draw()
         
         return {
             "success": True,
             "winner": winner,
-            "game_over": winner is not None,
+            "is_draw": is_draw,
+            "game_over": winner is not None or is_draw,
             "board": game.game_state.board
         }
         
     except Exception as e:
         logger.error(f"Error checking winner: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/game/entanglements")
 def get_entanglements():
@@ -293,10 +290,10 @@ def get_moves():
 if __name__ == "__main__":
     import uvicorn
     
-    print("🚀 Starting Quantum Tic-Tac-Toe API Server...")
-    print("📡 Server will run at: http://localhost:8000")
-    print("📖 API docs at: http://localhost:8000/docs")
-    print("🎮 Ready to play!\n")
+    print("Starting Quantum Tic-Tac-Toe API Server...")
+    print("Server will run at: http://localhost:8000")
+    print("API docs at: http://localhost:8000/docs")
+    print("Ready to play!\n")
     
     uvicorn.run(
         app, 

@@ -22,37 +22,42 @@ import { useQuantumAPI } from './useQuantumAPI.js';
  * Convert Python API response to board we can display
  */
 function buildBoardFromAPI(apiGameState) {
-  // Create empty board (9 squares)
   const board = Array(9).fill().map(() => ({
-    quantumMoveIds: [],    // List of quantum moves in this square
-    classicalMoveId: null,  // Classical move (after collapse)
+    quantumMoveIds: [],
+    classicalMoveId: null,
     state: SQUARE_STATES.EMPTY
   }));
 
-  // Add quantum moves (moves that haven't collapsed yet)
+  // First, mark all classical squares from the board
+  if (apiGameState.board) {
+    apiGameState.board.forEach((player, index) => {
+      if (player !== null && player !== undefined) {  // More explicit check
+        board[index].classicalMoveId = player;
+        board[index].state = SQUARE_STATES.CLASSICAL;
+        board[index].quantumMoveIds = [];
+        
+        console.log(`Square ${index}: Classical ${player}`);  // Debug log
+      }
+    });
+  }
+
+  // Then add quantum moves (only for non-classical squares)
   if (apiGameState.moves) {
     apiGameState.moves.forEach(move => {
       if (!move.collapsed) {
-        // This move exists in 2 squares simultaneously!
         move.squares.forEach(squareIndex => {
-          board[squareIndex].quantumMoveIds.push(move.move_id);
-          board[squareIndex].state = SQUARE_STATES.QUANTUM;
+          // Only add quantum moves to non-classical squares
+          if (board[squareIndex].state !== SQUARE_STATES.CLASSICAL) {
+            board[squareIndex].quantumMoveIds.push(move.move_id);
+            board[squareIndex].state = SQUARE_STATES.QUANTUM;
+          }
         });
       }
     });
   }
 
-  // Add classical moves (collapsed moves)
-  if (apiGameState.board) {
-    apiGameState.board.forEach((player, index) => {
-      if (player) {
-        // This square has a classical move (X or O)
-        board[index].classicalMoveId = player;
-        board[index].state = SQUARE_STATES.CLASSICAL;
-        board[index].quantumMoveIds = []; // Clear quantum moves
-      }
-    });
-  }
+  // Log the final board state for debugging
+  console.log('Built board:', board.map((sq, i) => `${i}: ${sq.state} - ${sq.classicalMoveId}`));
 
   return board;
 }
@@ -64,18 +69,19 @@ function calculateStats(apiGameState) {
   const quantumMoves = apiGameState.moves?.filter(m => !m.collapsed).length || 0;
   const classicalMoves = apiGameState.moves?.filter(m => m.collapsed).length || 0;
   const entanglements = apiGameState.entanglements?.length || 0;
-  
+
   const board = apiGameState.board || [];
   const emptySquares = board.filter(sq => sq === null).length;
   const classicalSquares = board.filter(sq => sq !== null).length;
 
   return {
-    totalMoves: quantumMoves + classicalMoves,
+    totalMoves: apiGameState.move_count || 0,
     quantumMoves,
     classicalMoves,
     entanglements,
     emptySquares,
-    classicalSquares
+    classicalSquares,
+    moveCount: apiGameState.move_count || 0
   };
 }
 
@@ -105,12 +111,143 @@ export const useGameState = () => {
     classicalMoves: 0,
     entanglements: 0,
     emptySquares: 9,
-    classicalSquares: 0
+    classicalSquares: 0,
+    moveCount: 0
   };
+
+  // ==========================================
+  // GAME STATE CHECKING FUNCTIONS
+  // ==========================================
+
+  /**
+   * Check for winner after moves
+   */
+  const checkWinner = useCallback(async () => {
+    const result = await api.checkWinner();
+
+    if (result && result.success) {
+      if (result.winner) {
+        console.log(' Winner detected:', result.winner);
+
+        setGameState(prev => ({
+          ...prev,
+          status: result.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
+          winner: result.winner,
+          winningLine: result.winning_line || []
+        }));
+      } else if (result.is_draw) {
+        console.log(' Draw detected!');
+
+        setGameState(prev => ({
+          ...prev,
+          status: GAME_STATUS.DRAW,
+          winner: null
+        }));
+      }
+    }
+  }, [api]);
+
+  /**
+   * Check if game should end (all squares classical)
+   */
+  const checkGameEnd = useCallback(async () => {
+    const allClassical = board.every(square => 
+      square.state === SQUARE_STATES.CLASSICAL || 
+      square.classicalMoveId !== null
+    );
+    
+    if (allClassical) {
+      console.log('All squares filled - checking for winner/draw');
+      await checkWinner();
+      return true;
+    }
+    return false;
+  }, [board, checkWinner]);
 
   // ==========================================
   // PLAYER ACTIONS
   // ==========================================
+
+  /**
+   * Execute quantum move via Python API
+   */
+  const executeQuantumMove = useCallback(async (squares) => {
+    if (squares.length !== 2) return;
+
+    // Check if we have available squares
+    const availableSquares = board.filter(sq => 
+      sq.state !== SQUARE_STATES.CLASSICAL
+    );
+    
+    if (availableSquares.length === 0) {
+      console.log(' No squares available for quantum moves');
+      await checkGameEnd();
+      return;
+    }
+
+    console.log('Making quantum move:', squares);
+    
+    const result = await api.makeQuantumMove(squares[0], squares[1]);
+    
+    if (result && result.success) {
+      console.log(' Move successful');
+      
+      // Update game state from API response
+      setApiGameState(result.game_state);
+
+      // Check if cycle detected
+      if (result.cycle_detected) {
+        console.log('Cycle detected!');
+        console.log('Cycle creator:', result.cycle_creator);
+        console.log('Collapse chooser:', result.collapse_chooser);
+
+        const collapseOptions = result.collapse_options || [];
+
+        setGameState(prev => ({
+          ...prev,
+          status: GAME_STATUS.WAITING_COLLAPSE,
+          currentPlayer: result.collapse_chooser || result.game_state.current_player,
+          cycleCreator: result.cycle_creator,
+          collapseChooser: result.collapse_chooser,
+          collapseOptions: collapseOptions,
+          pendingCycle: {
+            id: 'cycle_1',
+            moveIds: result.game_state.moves
+              .filter(m => !m.collapsed)
+              .map(m => m.move_id),
+            creator: result.cycle_creator,
+            chooser: result.collapse_chooser
+          }
+        }));
+
+        setApiGameState({
+          ...result.game_state,
+          collapseOptions: collapseOptions,
+          cycleCreator: result.cycle_creator,
+          collapseChooser: result.collapse_chooser
+        });
+      } else {
+        // No cycle, continue playing
+        setGameState(prev => ({
+          ...prev,
+          status: GAME_STATUS.PLAYING,
+          currentPlayer: result.game_state.current_player
+        }));
+        
+        // Check for game end after normal move
+        setTimeout(async () => {
+          await checkGameEnd();
+        }, 100);
+      }
+
+      // Clear selection
+      setSelectedSquares([]);
+
+    } else {
+      console.error(' Move failed');
+      setSelectedSquares([]);
+    }
+  }, [api, board, checkGameEnd]);
 
   /**
    * Handle when player clicks a square
@@ -118,7 +255,7 @@ export const useGameState = () => {
   const selectSquare = useCallback((square) => {
     // Don't allow clicks if game is over or waiting for collapse
     if (gameState.status !== GAME_STATUS.PLAYING) return;
-    
+
     // Can't click on classical squares
     const squareData = board[square];
     if (squareData.state === SQUARE_STATES.CLASSICAL) {
@@ -143,120 +280,72 @@ export const useGameState = () => {
     }
 
     setSelectedSquares(newSelection);
-    
+
     // If 2 squares selected, make the move!
     if (newSelection.length === 2) {
       executeQuantumMove(newSelection);
     }
-  }, [gameState, selectedSquares, board]);
-
-  /**
-   * Execute quantum move via Python API
-   */
-  const executeQuantumMove = useCallback(async (squares) => {
-    if (squares.length !== 2) return;
-
-    console.log('Making quantum move:', squares);
-    
-    // Call Python API
-    const result = await api.makeQuantumMove(squares[0], squares[1]);
-    
-    if (result && result.success) {
-      console.log(' Move successful');
-      
-      // Update game state from API response
-      setApiGameState(result.game_state);
-      
-      // Check if cycle detected
-      if (result.cycle_detected) {
-        console.log(' Cycle detected!');
-        console.log('Collapse options:', result.collapse_options);
-        
-        // Update state to show collapse UI
-        setGameState(prev => ({
-          ...prev,
-          status: GAME_STATUS.WAITING_COLLAPSE,
-          currentPlayer: result.game_state.current_player,
-          collapseOptions: result.collapse_options || [],
-          pendingCycle: { id: 'cycle_1' }
-        }));
-      } else {
-        // No cycle, continue playing
-        setGameState(prev => ({
-          ...prev,
-          status: GAME_STATUS.PLAYING,
-          currentPlayer: result.game_state.current_player
-        }));
-      }
-      
-      // Clear selection
-      setSelectedSquares([]);
-      
-    } else {
-      console.error(' Move failed');
-      setSelectedSquares([]);
-    }
-  }, [api]);
-/**
-   * Check for winner after moves
-   */
-   const checkWinner = useCallback(async () => {
-    const result = await api.checkWinner();
-    
-    if (result && result.success) {
-      if (result.winner) {
-        console.log(' Winner detected:', result.winner);
-        
-        setGameState(prev => ({
-          ...prev,
-          status: result.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
-          winner: result.winner,
-          winningLine: result.winning_line || []
-        }));
-      } else if (result.game_over && !result.winner) {
-        setGameState(prev => ({
-          ...prev,
-          status: GAME_STATUS.DRAW
-        }));
-      }
-    }
-  }, [api]);
+  }, [gameState, selectedSquares, board, executeQuantumMove]);
 
   /**
    * Choose a collapse option
    */
-    const chooseCollapse = useCallback(async (option) => {
-    console.log('Collapsing with chosen option:', option);
-    
-    const result = await api.collapseMove(option);
-    
-    if (result && result.success) {
-      console.log('Collapse successful:', result.collapse_results);
-      
-      setApiGameState(result.game_state);
-      
-      setGameState(prev => ({
-        ...prev,
-        status: GAME_STATUS.PLAYING,
-        collapseOptions: [],
-        pendingCycle: null
-      }));
-      
-      // Check for winner after collapse
-      setTimeout(() => checkWinner(), 500);
-    } else {
-      console.error(' Collapse failed');
-    }
-  }, [api, checkWinner]);
+  const chooseCollapse = useCallback(async (option) => {
+  console.log('Collapsing with chosen option:', option);
 
-  // 5. resetGame
+  const result = await api.collapseMove(option);
+
+  if (result && result.success) {
+    console.log(' Collapse successful:', result.collapse_results);
+
+    // Force complete state update
+    setApiGameState(result.game_state);
+    
+    // Force a game state refresh to ensure sync
+    const stateCheck = await api.getGameState();
+    if (stateCheck && stateCheck.success) {
+      setApiGameState(stateCheck.game_state);
+    }
+
+    setGameState(prev => ({
+      ...prev,
+      status: GAME_STATUS.PLAYING,
+      collapseOptions: [],
+      pendingCycle: null
+    }));
+
+    // Check for winner immediately after collapse
+    const winnerCheck = await api.checkWinner();
+    if (winnerCheck && winnerCheck.success) {
+      if (winnerCheck.winner) {
+        console.log(' Winner:', winnerCheck.winner);
+        setGameState(prev => ({
+          ...prev,
+          status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
+          winner: winnerCheck.winner
+        }));
+        return; // Stop here if there's a winner
+      }
+    }
+
+    // Only check for game end if no winner found
+    setTimeout(async () => {
+      await checkGameEnd();
+    }, 500);
+  }
+}, [api, checkGameEnd]);
+
+  /**
+   * Reset game
+   */
   const resetGame = useCallback(async () => {
-  
+    console.log('Resetting game...');
+    
     // Call API to reset
     const result = await api.resetGame();
     
     if (result && result.success) {
-      console.log('✅ Game reset');
+      console.log('Game reset');
       setApiGameState(result.game_state);
       setGameState(createGameState());
       setSelectedSquares([]);
@@ -282,7 +371,7 @@ export const useGameState = () => {
           available.push(idx);
         }
       });
-      
+
       // Pick 2 random squares
       if (available.length >= 2) {
         const square1 = available[Math.floor(Math.random() * available.length)];
@@ -290,7 +379,7 @@ export const useGameState = () => {
         do {
           square2 = available[Math.floor(Math.random() * available.length)];
         } while (square2 === square1);
-        
+
         executeQuantumMove([square1, square2]);
       }
     }
@@ -308,9 +397,9 @@ export const useGameState = () => {
         setApiGameState(result.game_state);
       }
     };
-    
+
     loadGameState();
-  }, []);
+  }, [api]);
 
   // ==========================================
   // RETURN EVERYTHING
@@ -319,6 +408,7 @@ export const useGameState = () => {
   return {
     // State
     gameState,
+    apiGameState,
     board,
     stats,
     selectedSquares,
@@ -333,13 +423,13 @@ export const useGameState = () => {
     // Computed properties
     isPlaying: gameState.status === GAME_STATUS.PLAYING,
     isWaitingCollapse: gameState.status === GAME_STATUS.WAITING_COLLAPSE,
-    isGameOver: gameState.status === GAME_STATUS.X_WINS || 
-                gameState.status === GAME_STATUS.O_WINS || 
+    isGameOver: gameState.status === GAME_STATUS.X_WINS ||
+                gameState.status === GAME_STATUS.O_WINS ||
                 gameState.status === GAME_STATUS.DRAW,
     currentPlayer: apiGameState?.current_player || PLAYERS.X,
     winner: gameState.winner,
     winningLine: gameState.winningLine || [],
-    
+
     // API status
     loading: api.loading,
     error: api.error
