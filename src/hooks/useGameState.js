@@ -151,18 +151,39 @@ export const useGameState = () => {
    * Check if game should end (all squares classical)
    */
   const checkGameEnd = useCallback(async () => {
-    const allClassical = board.every(square => 
-      square.state === SQUARE_STATES.CLASSICAL || 
-      square.classicalMoveId !== null
-    );
+    // Count empty squares
+    const emptyCount = board.filter(sq => 
+      sq.state === SQUARE_STATES.EMPTY || sq.classicalMoveId === null
+    ).length;
     
-    if (allClassical) {
-      console.log('All squares filled - checking for winner/draw');
-      await checkWinner();
+    // If less than 2 empty squares, check for game end
+    if (emptyCount < 2) {
+      console.log(`Less than 2 empty squares (${emptyCount}) - checking game end`);
+      
+      const result = await api.checkWinner();
+      
+      if (result && result.success) {
+        if (result.winner) {
+          console.log('✓ Winner:', result.winner);
+          setGameState(prev => ({
+            ...prev,
+            status: result.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
+            winner: result.winner
+          }));
+        } else if (result.is_draw) {
+          console.log('✓ Draw: Not enough squares for quantum move');
+          setGameState(prev => ({
+            ...prev,
+            status: GAME_STATUS.DRAW,
+            winner: null
+          }));
+        }
+      }
+      
       return true;
     }
     return false;
-  }, [board, checkWinner]);
+  }, [board, api]);
 
   // ==========================================
   // PLAYER ACTIONS
@@ -327,7 +348,16 @@ export const useGameState = () => {
         return; // Stop here if there's a winner
       }
     }
-
+        // Check for draw if no winner
+    if (winnerCheck && winnerCheck.is_draw) {
+      console.log('✓ Draw after collapse');
+      setGameState(prev => ({
+        ...prev,
+        status: GAME_STATUS.DRAW,
+        winner: null
+      }));
+      return;
+    }
     // Only check for game end if no winner found
     setTimeout(async () => {
       await checkGameEnd();

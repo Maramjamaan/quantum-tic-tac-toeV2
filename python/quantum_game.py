@@ -183,6 +183,13 @@ class QuantumTicTacToe:
         is_draw = self.check_for_draw()
         
         if winner or is_draw:
+            # Log why game is over
+            if winner:
+                logger.info(f"Game over: {winner} wins")
+            if is_draw:
+                empty = sum(1 for s in self.game_state.board if s is None)
+                logger.info(f"Game over: Draw (empty squares: {empty})")
+            
             return {
                 'success': False,
                 'error': 'Game is already over',
@@ -224,45 +231,13 @@ class QuantumTicTacToe:
         # A cycle is when entanglements form a closed loop (A→B→C→A)
         cycle_detected = self._check_for_cycles()
         
+       
         # STEP 6: If cycle detected, generate collapse options
-        # If cycle detected, generate VALID collapse options
         collapse_options = []
         if cycle_detected:
-            import random
-            # Get all uncollapsed moves
-            uncollapsed_moves = [m for m in self.game_state.moves if not m.collapsed]
-            
-            # Generate up to 10 attempts to find valid options
-            attempts = 0
-            max_attempts = 50
-            
-            while len(collapse_options) < 3 and attempts < max_attempts:
-                attempts += 1
-                option = {}
-                used_squares = set()  # Track which squares are used
-                valid = True
-                
-                # Try to assign each move to a square
-                for m in uncollapsed_moves:
-                    # Try both squares for this move
-                    available = [sq for sq in m.squares if sq not in used_squares]
-                    
-                    if available:
-                        # Pick a random available square
-                        chosen = random.choice(available)
-                        option[m.move_id] = chosen
-                        used_squares.add(chosen)
-                    else:
-                        # No available squares - this option is invalid
-                        valid = False
-                        break
-                
-                # Only add if valid and not duplicate
-                if valid and option not in collapse_options:
-                    collapse_options.append(option)
-            
-            # If we couldn't generate 3 options, that's ok - use what we have
-            logger.info(f"Generated {len(collapse_options)} valid collapse options")
+            # Use the new method to generate options
+            collapse_options = self.generate_collapse_options(max_options=3)
+            logger.info(f"Generated {len(collapse_options)} collapse options")
         
         
         # STEP 7: Handle player switching and cycle logic
@@ -630,26 +605,64 @@ class QuantumTicTacToe:
     
     def check_for_draw(self) -> bool:
         """
-        Check if the game is a draw.
-        Draw occurs when all squares have classical marks but no winner.
-        
-        Returns:
-            True if draw, False otherwise
+        Check if game is a draw.
+        Draw when: no winner AND (board full OR less than 2 empty squares)
         """
-        board = self.game_state.board
-        
-        # Check if all squares are filled
-        all_filled = all(square is not None for square in board)
-        
-        if not all_filled:
-            return False  # Game can still continue
-        
-        # All squares filled, check if there's a winner
+        # If someone won, not a draw
         winner = self.check_winner()
+        if winner:
+            return False
         
-        # If all filled and no winner, it's a draw
-        return winner is None
-
+        # Count empty squares
+        empty_squares = sum(1 for square in self.game_state.board if square is None)
+        
+        # Draw if:
+        # 1. Board completely full (0 empty)
+        # 2. Less than 2 empty squares (can't make quantum move)
+        if empty_squares < 2:
+            return True
+        
+        return False
+    def generate_collapse_options(self, max_options=3):
+        """Generate valid collapse options using backtracking"""
+        # Get uncollapsed moves
+        uncollapsed = [m for m in self.game_state.moves if not m.collapsed]
+        
+        if not uncollapsed:
+            return []
+        
+        all_options = []
+        
+        def backtrack(move_index, current_option, used_squares):
+            # If we assigned all moves, save this option
+            if move_index == len(uncollapsed):
+                all_options.append(current_option.copy())
+                return
+            
+            # Stop if we have enough options
+            if len(all_options) >= max_options:
+                return
+            
+            move = uncollapsed[move_index]
+            
+            # Try both squares for this move
+            for square in move.squares:
+                if square not in used_squares:
+                    # Assign this square
+                    current_option[move.move_id] = square
+                    used_squares.add(square)
+                    
+                    # Try next move
+                    backtrack(move_index + 1, current_option, used_squares)
+                    
+                    # Undo (backtrack)
+                    del current_option[move.move_id]
+                    used_squares.remove(square)
+        
+        # Start backtracking
+        backtrack(0, {}, set())
+        return all_options
+    
     def reset_game(self):
         """Reset game to initial state"""
         self.game_state = GameState()
