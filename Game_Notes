@@ -1,0 +1,67 @@
+# Quantum Tic-Tac-Toe - Personal Notes
+
+## Core Rules (from Allan Goff's paper)
+
+### 1. Quantum Moves
+- Each player places their mark in TWO squares simultaneously
+- The mark exists in superposition (both squares at once)
+- Notation: X1, X2, O1, O2, etc.
+
+### 2. Entanglement
+- When two moves share a square, they become entangled
+- Example: X1 in [0,4] and O1 in [4,8] are entangled at square 4
+
+### 3. Cycles and Collapse
+- A cycle = closed loop of entanglements (A→B→C→A)
+- When a cycle forms, ALL entangled moves must collapse
+- The player who CREATED the cycle = the one who made the last move completing the loop
+- The OTHER player (who didn't create the cycle) CHOOSES how to collapse
+
+### 4. Winning
+- Only CLASSICAL (collapsed) marks count for winning
+- Need 3 classical marks in a row (horizontal, vertical, or diagonal)
+- Winner determined AFTER collapse, not by who chose collapse
+
+## Important Clarifications
+
+### Why the cycle creator might still win:
+1. Collapse options are LIMITED by original quantum positions
+2. O can only choose from VALID configurations
+3. Sometimes all valid options still result in the cycle creator winning
+
+### Example:
+- X creates cycle
+- O chooses collapse from available options
+- All moves collapse simultaneously
+- Board is checked for winner
+- X might still have 3 in a row despite O choosing the configuration
+
+## Test Scenarios
+
+### Cycle Creation Test:
+1. X1: (0, 4)
+2. O1: (4, 8) - entangled with X1 at 4
+3. X2: (8, 0) - entangled with O1 at 8 AND X1 at 0 = CYCLE!
+Result: X created cycle, O chooses collapse
+
+### Draw Test:
+[Add your own test scenario here after experimenting]
+
+## Questions to Explore with Pen & Paper
+
+1. Map out all entanglements in a game
+2. Trace which move completes a cycle
+3. List all valid collapse options
+4. See why certain configurations are unavoidable
+
+## Technical Implementation Notes
+
+- Frontend (React) displays quantum states
+- Backend (Python/Qiskit) handles quantum logic
+- API communication for moves and collapse
+- State synchronization is critical
+
+## References
+
+- Allan Goff's original paper on Quantum Tic-Tac-Toe
+- Implementation uses Qiskit for quantum simulation
