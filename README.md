@@ -1,10 +1,10 @@
-# ⚛️ Quantum Tic-Tac-Toe
+# Quantum Tic-Tac-Toe
 
 A quantum computing educational tool that brings quantum mechanics concepts to life through an interactive game.
 
-![Game Screenshot](screenshot.png) <!-- Add a screenshot later -->
 
-## 🎓 About
+
+## About
 
 This graduation project implements **Quantum Tic-Tac-Toe** based on Allan Goff's research paper, demonstrating real quantum computing concepts:
 - **Superposition**: Moves exist in multiple positions simultaneously
@@ -13,22 +13,22 @@ This graduation project implements **Quantum Tic-Tac-Toe** based on Allan Goff's
 
 **Educational Purpose**: Help students understand quantum mechanics through interactive gameplay.
 
-## ✨ Features
+## Features
 
 ### Quantum Mechanics Implementation
-- ✅ Real quantum circuits using IBM's Qiskit framework
-- ✅ Hadamard gates for superposition
-- ✅ Quantum measurement and collapse
-- ✅ Entanglement detection and visualization
+- Real quantum circuits using IBM's Qiskit framework
+- Hadamard gates for superposition
+- Quantum measurement and collapse
+- Entanglement detection and visualization
 
 ### Game Features
-- 🎮 Interactive web-based interface
-- 🌀 Visual quantum state representation
-- 🔄 Player-controlled collapse mechanism
-- 📊 Real-time game statistics
-- 🏆 Winner detection and draw handling
+- Interactive web-based interface
+- Visual quantum state representation
+- Player-controlled collapse mechanism
+- Real-time game statistics
+- Winner detection and draw handling
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Frontend:**
 - React.js 19.1.1
@@ -41,7 +41,7 @@ This graduation project implements **Quantum Tic-Tac-Toe** based on Allan Goff's
 - Qiskit 0.45.0 (IBM Quantum Framework)
 - Qiskit Aer Simulator
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before running this project, ensure you have:
 
@@ -56,22 +56,22 @@ python --version
 npm --version
 ```
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
-### 1️⃣ Clone the Repository
+### 1️Clone the Repository
 
 ```bash
 git clone https://github.com/Maramjamaan/quantum-tic-tac-toeV2.git
 cd quantum-tic-tac-toeV2
 ```
 
-### 2️⃣ Install Frontend Dependencies
+### Install Frontend Dependencies
 
 ```bash
 npm install
 ```
 
-### 3️⃣ Install Backend Dependencies
+### Install Backend Dependencies
 
 ```bash
 cd python
@@ -79,7 +79,7 @@ pip install -r requirements.txt
 cd ..
 ```
 
-## ▶️ Running the Application
+## Running the Application
 
 You need **TWO terminals** running simultaneously:
 
@@ -90,8 +90,8 @@ cd python
 python api.py
 ```
 
-✅ Backend will run on: `http://localhost:8000`  
-✅ API docs available at: `http://localhost:8000/docs`
+  Backend will run on: `http://localhost:8000`  
+  API docs available at: `http://localhost:8000/docs`
 
 ### Terminal 2: Start Frontend (React App)
 
@@ -99,10 +99,10 @@ python api.py
 npm start
 ```
 
-✅ Frontend will run on: `http://localhost:3000`  
-✅ Browser will open automatically
+  Frontend will run on: `http://localhost:3000`  
+  Browser will open automatically
 
-## 🎮 How to Play
+## How to Play
 
 ### Basic Gameplay
 
@@ -120,7 +120,7 @@ npm start
 - Only **classical marks** (after collapse) count for winning
 - Game ends in a **draw** if less than 2 squares remain available
 
-## 📚 Quantum Concepts Explained
+## Quantum Concepts Explained
 
 ### Superposition (التراكب الكمي)
 Your move exists in **two squares simultaneously** until measured. Just like Schrödinger's cat being both alive and dead until observed.
@@ -142,7 +142,7 @@ When entanglements form a closed loop, forcing collapse.
 
 **In the game**: X1→O1→X2→X1 creates a cycle, triggering collapse.
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 quantum-tic-tac-toe/
@@ -158,7 +158,7 @@ quantum-tic-tac-toe/
 └── README.md                # This file
 ```
 
-## 🔧 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -172,20 +172,20 @@ quantum-tic-tac-toe/
 
 **Full API documentation**: `http://localhost:8000/docs`
 
-## 🧪 Testing
+##  Testing
 
 ### Manual Testing Checklist
 
-- [ ] Game starts with Player X
-- [ ] Can select 2 squares for quantum moves
-- [ ] Quantum moves appear in both squares
-- [ ] Entanglement detected when squares shared
-- [ ] Cycle detection works
-- [ ] Collapse options appear
-- [ ] Winner detection works (3 in a row)
-- [ ] Draw detection works (board full)
-- [ ] Draw detection works (< 2 squares available)
-- [ ] Reset game works
+-  Game starts with Player X
+-  Can select 2 squares for quantum moves
+-  Quantum moves appear in both squares
+-  Entanglement detected when squares shared
+-  Cycle detection works
+-  Collapse options appear
+-  Winner detection works (3 in a row)
+-  Draw detection works (board full)
+-  Draw detection works (< 2 squares available)
+-  Reset game works
 
 ### Run Backend Tests
 
@@ -196,7 +196,7 @@ python quantum_game.py
 
 Expected output: Test scenarios with cycle detection and collapse.
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Backend won't start
 ```bash
@@ -226,37 +226,36 @@ taskkill /PID <PID> /F
 lsof -ti:8000 | xargs kill -9
 ```
 
-## 📖 References
+## References
 
 - **Allan Goff's Paper**: Original Quantum Tic-Tac-Toe research
 - **Qiskit Documentation**: https://qiskit.org/documentation/
 - **FastAPI Documentation**: https://fastapi.tiangolo.com/
 
-## 👩‍💻 Author
+## Author
 
 **Maram**  
 Information Technology Student  
 Graduation Project - 2025
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Based on Allan Goff's Quantum Tic-Tac-Toe paper
 - Built with IBM's Qiskit quantum computing framework
 - Created as an educational tool to teach quantum mechanics concepts
 
-## 📝 License
+## License
 
 This project is for educational purposes as part of a graduation project.
 
 ---
 
-## 🎯 Future Enhancements
+## Future Enhancements
 
-- [ ] Arabic language version
-- [ ] Tutorial mode with step-by-step guidance
-- [ ] Real IBM Quantum Computer integration (currently using simulator)
-- [ ] Mobile responsive design improvements
-- [ ] Multiplayer online mode
+-  Arabic language version
+-  Tutorial mode with step-by-step guidance
+-  Mobile responsive design improvements
+-  Multiplayer online mode
 
 ---
 
