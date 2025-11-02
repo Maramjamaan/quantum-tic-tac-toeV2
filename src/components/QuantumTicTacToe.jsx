@@ -1,37 +1,39 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher';
 import { useGameState } from '../hooks/useGameState';
 import { SQUARE_STATES, PLAYERS, GAME_STATUS } from '../types/gameTypes';
 import './QuantumTicTacToe.css';
 
 // Instructions Panel Component (Left Side)
 const InstructionsPanel = ({ stats }) => {
+  const { t } = useLanguage();
   const [expandedSection, setExpandedSection] = useState('');
-
   return (
     <div className="instructions-panel">
-      <h2>How to Play</h2>
+      <h2>{t('instructions.title')}</h2>
 
       <div className="instruction-section">
         <button
           className="section-header"
           onClick={() => setExpandedSection(expandedSection === 'quantum' ? '' : 'quantum')}
         >
-          <span>Quantum Concepts</span>
+          <span>{t('instructions.quantum.title')}</span>
           <span className="arrow">{expandedSection === 'quantum' ? '▼' : '▶'}</span>
         </button>
         {expandedSection === 'quantum' && (
           <div className="section-content">
             <div className="concept-item">
-              <strong>Superposition:</strong> Each move exists in 2 squares simultaneously
+              {t('instructions.quantum.superposition')}
             </div>
             <div className="concept-item">
-              <strong>Entanglement:</strong> Moves sharing squares become correlated
+              {t('instructions.quantum.entanglement')}
             </div>
             <div className="concept-item">
-              <strong>Collapse:</strong> Quantum states resolve to classical positions
+              {t('instructions.quantum.collapse')}
             </div>
             <div className="concept-item">
-              <strong>Cycles:</strong> Closed loops trigger measurement
+              {t('instructions.quantum.cycles')}
             </div>
           </div>
         )}
@@ -42,17 +44,17 @@ const InstructionsPanel = ({ stats }) => {
           className="section-header"
           onClick={() => setExpandedSection(expandedSection === 'rules' ? '' : 'rules')}
         >
-          <span>Game Rules</span>
+          <span>{t('instructions.rules.title')}</span>
           <span className="arrow">{expandedSection === 'rules' ? '▼' : '▶'}</span>
         </button>
         {expandedSection === 'rules' && (
           <div className="section-content">
             <ol className="rules-list">
-              <li>Select exactly 2 squares per move</li>
-              <li>Your mark exists in both squares</li>
-              <li>Sharing squares creates entanglement</li>
-              <li>Cycles force quantum collapse</li>
-              <li>Get 3 classical marks in a row to win</li>
+              <li>{t('instructions.rules.rule1')}</li>
+              <li>{t('instructions.rules.rule2')}</li>
+              <li>{t('instructions.rules.rule3')}</li>
+              <li>{t('instructions.rules.rule4')}</li>
+              <li>{t('instructions.rules.rule5')}</li>
             </ol>
           </div>
         )}
@@ -63,33 +65,36 @@ const InstructionsPanel = ({ stats }) => {
           className="section-header"
           onClick={() => setExpandedSection(expandedSection === 'strategy' ? '' : 'strategy')}
         >
-          <span>Strategy Tips</span>
+          <span>{t('instructions.strategy.title')}</span>
           <span className="arrow">{expandedSection === 'strategy' ? '▼' : '▶'}</span>
         </button>
         {expandedSection === 'strategy' && (
           <div className="section-content">
             <ul className="tips-list">
-              <li>Create entanglements to control collapse</li>
-              <li>Force cycles when you're ahead</li>
-              <li>Block opponent's quantum moves</li>
-              <li>Think probabilistically</li>
+              <li>{t('instructions.strategy.tip1')}</li>
+              <li>{t('instructions.strategy.tip2')}</li>
+              <li>{t('instructions.strategy.tip3')}</li>
+              <li>{t('instructions.strategy.tip4')}</li>
             </ul>
           </div>
         )}
       </div>
 
       <div className="quick-stats">
-        <h3>Quick Stats</h3>
+        <h3>{t('stats.quickStats')}</h3>
+
         <div className="stat-row">
-          <span>Quantum Moves:</span>
+          <span>{t('stats.quantumMoves')}</span>
           <span className="stat-value">{stats.quantumMoves}</span>
         </div>
+
         <div className="stat-row">
-          <span>Entanglements:</span>
+          <span>{t('stats.entanglements')}</span>
           <span className="stat-value">{stats.entanglements}</span>
         </div>
+
         <div className="stat-row">
-          <span>Collapses:</span>
+          <span>{t('stats.collapses')}</span>
           <span className="stat-value">0</span>
         </div>
       </div>
@@ -107,6 +112,7 @@ const GameBoard = ({
   isPlaying,
   winningLine
 }) => {
+  const { t } = useLanguage(); 
   const renderSquare = (index) => {
     const square = board[index];
     const isSelected = selectedSquares.includes(index);
@@ -174,10 +180,10 @@ const GameBoard = ({
       <div className="game-status">
         {isPlaying && (
           <div className="current-player">
-            Player {currentPlayer}'s turn
+            {t('gameBoard.playerTurn', { player: currentPlayer })}
             {selectedSquares.length > 0 && (
               <span className="selection-count">
-                {' '}({selectedSquares.length}/2 squares selected)
+                {' '}{t('gameBoard.squaresSelected', { count: selectedSquares.length })}
               </span>
             )}
           </div>
@@ -203,10 +209,10 @@ const ControlPanel = ({
   isGameOver,
   winner,
   resetGame,
-  autoPlay,
   chooseCollapse,
-  autoCollapse
+
 }) => {
+  const { t } = useLanguage();
   const [showStats, setShowStats] = useState(false);
 
   const renderGameStatus = () => {
@@ -214,17 +220,17 @@ const ControlPanel = ({
       if (winner) {
         return (
           <div className="status-card game-over">
-            <h3> Game Over!</h3>
-            <p className="winner-text">Player {winner} Wins!</p>
+            <h3> {t('controlPanel.gameOver')}</h3>
+            <p className="winner-text">{t('controlPanel.playerWins', { player: winner })}</p>
           </div>
         );
       } else {
         return (
           <div className="status-card game-over">
-            <h3> Game Over!</h3>
-            <p className="draw-text">It's a Draw!</p>
+            <h3> {t('controlPanel.gameOver')}</h3>
+            <p className="draw-text">{t('controlPanel.draw')}</p>
             <p style={{ fontSize: '0.85rem', color: '#666' }}>
-              All squares filled with no winner
+              {t('controlPanel.drawReason')}
             </p>
           </div>
         );
@@ -237,14 +243,14 @@ const ControlPanel = ({
 
       return (
         <div className="status-card collapse-pending">
-          <h3>Quantum Collapse!</h3>
-          <p>A cycle was detected in the entanglement graph!</p>
+          <h3> {t('controlPanel.quantumCollapse')}</h3>
+          <p>{t('controlPanel.cycleDetected')}</p>
           {cycleCreator && (
-            <p><strong>Player {cycleCreator}</strong> created the cycle.</p>
+            <p>{t('controlPanel.createdCycle', { player: cycleCreator })}</p>
           )}
-          <p><strong>Player {choosingPlayer}</strong>, choose how to collapse the quantum moves.</p>
+          <p>{t('controlPanel.chooseCollapse', { player: choosingPlayer })}</p>
           <p style={{ fontSize: '0.8rem', color: '#666' }}>
-            (The player who didn't create the cycle chooses)
+            {t('controlPanel.chooserNote')}
           </p>
         </div>
       );
@@ -256,9 +262,9 @@ const ControlPanel = ({
 
     return (
       <div className="status-card playing">
-        <h3>Game in Progress</h3>
-        <p>Current Player: <strong>{currentPlayer}</strong></p>
-        <p>Move #{moveNumber}</p>
+        <h3> {t('controlPanel.gameInProgress')}</h3>
+        <p>{t('controlPanel.currentPlayer')} <strong>{currentPlayer}</strong></p>
+        <p>{t('controlPanel.moveNumber', { number: moveNumber })}</p>
       </div>
     );
   };
@@ -271,7 +277,7 @@ const ControlPanel = ({
       return (
         <div className="no-options">
           <p style={{ textAlign: 'center', color: '#666', padding: '1rem' }}>
-            Generating collapse options...
+            {t('controlPanel.generating')}
           </p>
           <button
             className="control-btn reset-btn"
@@ -286,15 +292,15 @@ const ControlPanel = ({
 
     return (
       <div className="collapse-section">
-        <h4>Choose Collapse Configuration:</h4>
+        <h4>{t('controlPanel.collapseTitle')}</h4>
         <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>
-          Each option shows where quantum moves will collapse to classical positions:
+          {t('controlPanel.collapseDescription')}
         </p>
         <div className="collapse-options">
           {options.map((option, index) => (
             <div key={index} className="collapse-option">
               <div className="option-header">
-                <h5>Option {index + 1}</h5>
+                <h5>{t('controlPanel.option', { number: index + 1 })}</h5>
               </div>
               <div className="option-assignments">
                 {Object.entries(option).map(([moveId, square]) => (
@@ -303,11 +309,8 @@ const ControlPanel = ({
                   </div>
                 ))}
               </div>
-              <button
-                className="choose-btn"
-                onClick={() => chooseCollapse(option)}
-              >
-                ✓ Choose This
+              <button className="choose-btn" onClick={() => chooseCollapse(option)}>
+                ✓ {t('controlPanel.chooseThis')}
               </button>
             </div>
           ))}
@@ -319,7 +322,7 @@ const ControlPanel = ({
   return (
     <div className="control-panel">
       <div className="panel-header">
-        <h2> Control Panel</h2>
+        <h2> {t('controlPanel.title')}</h2>
       </div>
 
       <section className="status-section">
@@ -336,14 +339,14 @@ const ControlPanel = ({
         <h4>Game Controls</h4>
         <div className="controls-grid">
           <button className="control-btn reset-btn" onClick={resetGame}>
-            Reset Game
+            🔄 {t('controlPanel.resetGame')}
           </button>
-         
+
           <button
             className="control-btn toggle-btn"
             onClick={() => setShowStats(!showStats)}
           >
-             {showStats ? 'Hide' : 'Show'} Stats
+            {showStats ? t('controlPanel.hideStats') : t('controlPanel.showStats')}
           </button>
         </div>
       </section>
@@ -372,33 +375,25 @@ const ControlPanel = ({
         </section>
       )}
 
-      <section className="help-section">
-        <details>
-          <summary> How to Play</summary>
-          <div className="help-content">
-            <ol>
-              <li><strong>Quantum Moves:</strong> Select 2 squares for each move</li>
-              <li><strong>Entanglement:</strong> Sharing squares creates quantum entanglement</li>
-              <li><strong>Cycles:</strong> When entanglements form loops, you must choose how to collapse</li>
-              <li><strong>Winning:</strong> Get 3 classical marks in a row to win</li>
-            </ol>
-          </div>
-        </details>
-      </section>
+
     </div>
   );
 };
 
 // Main QuantumTicTacToe Component
 const QuantumTicTacToe = () => {
+  const { t } = useLanguage();  // ← هذا موجود
   const gameHook = useGameState();
 
   return (
     <div className="quantum-tictactoe">
+      <LanguageSwitcher />
+
       <header className="game-header">
-        <h1> Quantum Tic-Tac-Toe</h1>
-        <p className="game-subtitle">Experience superposition in a classic game</p>
+        <h1>{t('title')}</h1>
+        <p className="game-subtitle">{t('subtitle')}</p>
       </header>
+
 
       <main className="game-main">
         <div className="game-layout">

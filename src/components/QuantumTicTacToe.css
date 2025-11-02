@@ -244,8 +244,8 @@ body {
 }
 
 .game-board {
-  width: 360px;  /* Increased from 300px */
-  height: 360px; /* Increased from 300px */
+  width: 420px; 
+  height: 420px;
 }
 .control-panel {
   max-width: 300px;  /* Add this constraint */
@@ -864,4 +864,312 @@ body {
     font-size: 9px;
     padding: 1px 4px;
   }
+}
+/* ============================================
+   RTL SUPPORT - Add this to the END of QuantumTicTacToe.css
+   ============================================ */
+
+/* Language Toggle Button */
+.language-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  font-size: 0.9rem;
+  z-index: 1000;
+}
+
+.language-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+/* 
+
+[dir="rtl"] {
+  text-align: right;
+}
+[dir="rtl"] .quantum-tictactoe {
+  direction: rtl;
+}
+
+[dir="rtl"] .game-header {
+  text-align: center;
+}
+[dir="rtl"] .game-layout {
+  direction: ltr;
+}
+[dir="rtl"] .control-panel {
+  direction: ltr;
+  text-align: left;
+}
+
+[dir="rtl"] .instructions-panel {
+  direction: ltr;
+  text-align: left;
+}
+[dir="rtl"] .section-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .arrow {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .instruction-column ul,
+[dir="rtl"] .rules-list,
+[dir="rtl"] .tips-list {
+  padding-right: 1.2rem;
+  padding-left: 0;
+  text-align: right;
+}
+
+[dir="rtl"] .stat-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .controls-grid {
+  direction: rtl;
+}
+
+[dir="rtl"] .option-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .assignment {
+  direction: rtl;
+}
+
+[dir="rtl"] .concept-item {
+  border-right: 3px solid #667eea;
+  border-left: none;
+}
+
+[dir="rtl"] .square-number {
+  right: 2px;
+  left: auto;
+}
+
+[dir="rtl"] .entanglement-indicator {
+  left: 4px;
+  right: auto;
+}
+
+[dir="rtl"] .stat-item {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .stats-grid {
+  direction: rtl;
+}
+
+
+[dir="rtl"] .game-board {
+  direction: ltr;
+}
+
+[dir="rtl"] .board-grid {
+  direction: ltr;
+}
+
+
+[dir="rtl"] .language-toggle {
+  left: 1rem;
+  right: auto;
+}
+
+
+[dir="rtl"] .help-section {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .help-content {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .help-content ol {
+  padding-right: 20px;
+  padding-left: 0;
+}
+
+/* Collapse section RTL 
+[dir="rtl"] .collapse-section {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .collapse-options {
+  direction: rtl;
+}
+
+/* Quick stats RTL 
+[dir="rtl"] .quick-stats {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Responsive RTL 
+@media (max-width: 768px) {
+  [dir="rtl"] .language-toggle {
+    top: 0.5rem;
+    left: 0.5rem;
+    right: auto;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  [dir="rtl"] .language-toggle {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+[dir="rtl"] * {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+} */
+/* تعديل النصوص العربية فقط */
+html[lang="ar"] .status-card,
+html[lang="ar"] .collapse-section,
+html[lang="ar"] .collapse-option,
+html[lang="ar"] .control-panel h2,
+html[lang="ar"] .control-panel h3,
+html[lang="ar"] .control-panel h4,
+html[lang="ar"] .control-panel p,
+html[lang="ar"] .option-header h5 {
+  text-align: right;
+  direction: rtl;
+}
+
+/* الأزرار تبقى في المنتصف */
+html[lang="ar"] .choose-btn,
+html[lang="ar"] .control-btn {
+  text-align: center;
+}
+
+/* الأرقام والـ X, O تبقى من اليسار */
+html[lang="ar"] .assignment,
+html[lang="ar"] .option-assignments {
+  direction: ltr;
+  text-align: left;
+}
+
+
+
+/* تنسيق النصوص العربية في How to Play */
+html[lang="ar"] .instructions-panel {
+  direction: rtl;
+  text-align: right;
+}
+
+html[lang="ar"] .instructions-panel h2,
+html[lang="ar"] .instructions-panel h3,
+html[lang="ar"] .instructions-panel h4 {
+  text-align: right;
+}
+
+html[lang="ar"] .section-header {
+  direction: rtl;
+  text-align: right;
+}
+
+html[lang="ar"] .section-content {
+  direction: rtl;
+  text-align: right;
+}
+
+html[lang="ar"] .concept-item,
+html[lang="ar"] .rules-list,
+html[lang="ar"] .tips-list {
+  direction: rtl;
+  text-align: right;
+}
+
+html[lang="ar"] .rules-list,
+html[lang="ar"] .tips-list {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+html[lang="ar"] .quick-stats {
+  direction: rtl;
+  text-align: right;
+}
+
+html[lang="ar"] .stat-row {
+  direction: rtl;
+  justify-content: space-between;
+}
+
+/* خط عربي أفضل */
+html[lang="ar"] {
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+}
+
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4 {
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+  font-weight: 600;
+}
+
+html[lang="ar"] p,
+html[lang="ar"] li,
+html[lang="ar"] span {
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+  line-height: 1.8;
+}
+
+
+/* خط Cairo للعربي */
+html[lang="ar"] {
+  font-family: 'Cairo', 'Segoe UI', sans-serif;
+}
+
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4 {
+  font-family: 'Cairo', 'Segoe UI', sans-serif;
+  font-weight: 700;
+}
+
+html[lang="ar"] p,
+html[lang="ar"] li,
+html[lang="ar"] span {
+  font-family: 'Cairo', 'Segoe UI', sans-serif;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+
+
+/* GameBoard للعربي */
+html[lang="ar"] .game-board-container {
+  direction: rtl;
+}
+
+html[lang="ar"] .game-status {
+  direction: rtl;
+  text-align: center;
+}
+
+html[lang="ar"] .current-player {
+  direction: rtl;
+}
+
+html[lang="ar"] .game-board,
+html[lang="ar"] .board-grid {
+  direction: ltr;
 }

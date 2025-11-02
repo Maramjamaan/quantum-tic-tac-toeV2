@@ -1,0 +1,83 @@
+{
+  "title": "Quantum Tic-Tac-Toe",
+  "subtitle": "Experience Quantum Mechanics in a classic game",
+  "playerTurn": "Player {{player}}'s turn",
+  "reset": "Reset Game"
+  ,
+  
+  "instructions": {
+    "title": "How to Play",
+    "quantum": {
+      "title": "Quantum Concepts",
+      "superposition": "Superposition: Each move exists in 2 squares simultaneously",
+      "entanglement": "Entanglement: Moves sharing squares become correlated",
+      "collapse": "Collapse: Quantum states resolve to classical positions",
+      "cycles": "Cycles: Closed loops trigger measurement"
+    },
+    "rules": {
+      "title": "Game Rules",
+      "rule1": "Select exactly 2 squares per move",
+      "rule2": "Your mark exists in both squares",
+      "rule3": "Sharing squares creates entanglement",
+      "rule4": "Cycles force quantum collapse",
+      "rule5": "Get 3 classical marks in a row to win"
+    },
+    "strategy": {
+      "title": "Strategy Tips",
+      "tip1": "Create entanglements to control collapse",
+      "tip2": "Force cycles when you're ahead",
+      "tip3": "Block opponent's quantum moves",
+      "tip4": "Think probabilistically"
+    }
+  },
+  
+  "stats": {
+    "quickStats": "Quick Stats",
+    "quantumMoves": "Quantum Moves:",
+    "entanglements": "Entanglements:",
+    "collapses": "Collapses:"
+  },
+  
+ "gameBoard": {
+    "playerTurn": "Player {{player}}'s turn",
+    "squaresSelected": "({{count}}/2 squares selected)"
+  },
+  "controlPanel": {
+    "title": "Control Panel",
+    "gameInProgress": "Game in Progress",
+    "currentPlayer": "Current Player:",
+    "moveNumber": "Move #{{number}}",
+    "gameOver": "Game Over!",
+    "playerWins": "Player {{player}} Wins!",
+    "draw": "It's a Draw!",
+    "drawReason": "All squares filled with no winner",
+    "quantumCollapse": "Quantum Collapse!",
+    "cycleDetected": "A cycle was detected in the entanglement graph!",
+    "createdCycle": "Player {{player}} created the cycle.",
+    "chooseCollapse": "Player {{player}}, choose how to collapse the quantum moves.",
+    "chooserNote": "(The player who didn't create the cycle chooses)",
+    
+    "gameControls": "Game Controls",
+    "resetGame": "Reset Game",
+    "showStats": "Show Stats",
+    "hideStats": "Hide Stats",
+    
+    "collapseTitle": "Choose Collapse Configuration:",
+    "collapseDescription": "Each option shows where quantum moves will collapse to classical positions:",
+    "option": "Option {{number}}",
+    "chooseThis": "Choose This",
+    "generating": "Generating collapse options...",
+    
+    "statsTitle": "Game Statistics",
+    "totalMoves": "Total Moves:",
+    "quantumMoves": "Quantum Moves:",
+    "classicalMoves": "Classical Moves:",
+    "entanglements": "Entanglements:",
+    
+    "helpTitle": "How to Play",
+    "helpRule1": "Quantum Moves: Select 2 squares for each move",
+    "helpRule2": "Entanglement: Sharing squares creates quantum entanglement",
+    "helpRule3": "Cycles: When entanglements form loops, you must choose how to collapse",
+    "helpRule4": "Winning: Get 3 classical marks in a row to win"
+  }
+}
