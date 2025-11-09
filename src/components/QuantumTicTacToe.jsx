@@ -1,106 +1,9 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher';
 import { useGameState } from '../hooks/useGameState';
-import { SQUARE_STATES, PLAYERS, GAME_STATUS } from '../types/gameTypes';
+import { SQUARE_STATES } from '../types/gameTypes';
 import './QuantumTicTacToe.css';
-
-// Instructions Panel Component (Left Side)
-const InstructionsPanel = ({ stats }) => {
-  const { t } = useLanguage();
-  const [expandedSection, setExpandedSection] = useState('');
-  return (
-    <div className="instructions-panel">
-      <h2>{t('instructions.title')}</h2>
-
-      <div className="instruction-section">
-        <button
-          className="section-header"
-          onClick={() => setExpandedSection(expandedSection === 'quantum' ? '' : 'quantum')}
-        >
-          <span>{t('instructions.quantum.title')}</span>
-          <span className="arrow">{expandedSection === 'quantum' ? '▼' : '▶'}</span>
-        </button>
-        {expandedSection === 'quantum' && (
-          <div className="section-content">
-            <div className="concept-item">
-              {t('instructions.quantum.superposition')}
-            </div>
-            <div className="concept-item">
-              {t('instructions.quantum.entanglement')}
-            </div>
-            <div className="concept-item">
-              {t('instructions.quantum.collapse')}
-            </div>
-            <div className="concept-item">
-              {t('instructions.quantum.cycles')}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="instruction-section">
-        <button
-          className="section-header"
-          onClick={() => setExpandedSection(expandedSection === 'rules' ? '' : 'rules')}
-        >
-          <span>{t('instructions.rules.title')}</span>
-          <span className="arrow">{expandedSection === 'rules' ? '▼' : '▶'}</span>
-        </button>
-        {expandedSection === 'rules' && (
-          <div className="section-content">
-            <ol className="rules-list">
-              <li>{t('instructions.rules.rule1')}</li>
-              <li>{t('instructions.rules.rule2')}</li>
-              <li>{t('instructions.rules.rule3')}</li>
-              <li>{t('instructions.rules.rule4')}</li>
-              <li>{t('instructions.rules.rule5')}</li>
-            </ol>
-          </div>
-        )}
-      </div>
-
-      <div className="instruction-section">
-        <button
-          className="section-header"
-          onClick={() => setExpandedSection(expandedSection === 'strategy' ? '' : 'strategy')}
-        >
-          <span>{t('instructions.strategy.title')}</span>
-          <span className="arrow">{expandedSection === 'strategy' ? '▼' : '▶'}</span>
-        </button>
-        {expandedSection === 'strategy' && (
-          <div className="section-content">
-            <ul className="tips-list">
-              <li>{t('instructions.strategy.tip1')}</li>
-              <li>{t('instructions.strategy.tip2')}</li>
-              <li>{t('instructions.strategy.tip3')}</li>
-              <li>{t('instructions.strategy.tip4')}</li>
-            </ul>
-          </div>
-        )}
-      </div>
-
-      <div className="quick-stats">
-        <h3>{t('stats.quickStats')}</h3>
-
-        <div className="stat-row">
-          <span>{t('stats.quantumMoves')}</span>
-          <span className="stat-value">{stats.quantumMoves}</span>
-        </div>
-
-        <div className="stat-row">
-          <span>{t('stats.entanglements')}</span>
-          <span className="stat-value">{stats.entanglements}</span>
-        </div>
-
-        <div className="stat-row">
-          <span>{t('stats.collapses')}</span>
-          <span className="stat-value">0</span>
-        </div>
-      </div>
-    </div>
-  );
-};
+import Navbar from './Navbar';
 
 // GameBoard Component
 const GameBoard = ({
@@ -112,7 +15,8 @@ const GameBoard = ({
   isPlaying,
   winningLine
 }) => {
-  const { t } = useLanguage(); 
+  const { t } = useLanguage();
+  
   const renderSquare = (index) => {
     const square = board[index];
     const isSelected = selectedSquares.includes(index);
@@ -210,7 +114,6 @@ const ControlPanel = ({
   winner,
   resetGame,
   chooseCollapse,
-
 }) => {
   const { t } = useLanguage();
   const [showStats, setShowStats] = useState(false);
@@ -220,14 +123,14 @@ const ControlPanel = ({
       if (winner) {
         return (
           <div className="status-card game-over">
-            <h3> {t('controlPanel.gameOver')}</h3>
+            <h3>{t('controlPanel.gameOver')}</h3>
             <p className="winner-text">{t('controlPanel.playerWins', { player: winner })}</p>
           </div>
         );
       } else {
         return (
           <div className="status-card game-over">
-            <h3> {t('controlPanel.gameOver')}</h3>
+            <h3>{t('controlPanel.gameOver')}</h3>
             <p className="draw-text">{t('controlPanel.draw')}</p>
             <p style={{ fontSize: '0.85rem', color: '#666' }}>
               {t('controlPanel.drawReason')}
@@ -243,7 +146,7 @@ const ControlPanel = ({
 
       return (
         <div className="status-card collapse-pending">
-          <h3> {t('controlPanel.quantumCollapse')}</h3>
+          <h3>{t('controlPanel.quantumCollapse')}</h3>
           <p>{t('controlPanel.cycleDetected')}</p>
           {cycleCreator && (
             <p>{t('controlPanel.createdCycle', { player: cycleCreator })}</p>
@@ -256,13 +159,12 @@ const ControlPanel = ({
       );
     }
 
-    // Use the current player from API state for accuracy
     const currentPlayer = apiGameState?.current_player || gameState.currentPlayer;
     const moveNumber = (apiGameState?.move_count || 0) + 1;
 
     return (
       <div className="status-card playing">
-        <h3> {t('controlPanel.gameInProgress')}</h3>
+        <h3>{t('controlPanel.gameInProgress')}</h3>
         <p>{t('controlPanel.currentPlayer')} <strong>{currentPlayer}</strong></p>
         <p>{t('controlPanel.moveNumber', { number: moveNumber })}</p>
       </div>
@@ -270,7 +172,6 @@ const ControlPanel = ({
   };
 
   const renderCollapseOptions = () => {
-    // Check both sources for collapse options
     const options = gameState.collapseOptions || apiGameState?.collapseOptions || [];
 
     if (!isWaitingCollapse || options.length === 0) {
@@ -322,7 +223,7 @@ const ControlPanel = ({
   return (
     <div className="control-panel">
       <div className="panel-header">
-        <h2> {t('controlPanel.title')}</h2>
+        <h2>{t('controlPanel.title')}</h2>
       </div>
 
       <section className="status-section">
@@ -374,31 +275,23 @@ const ControlPanel = ({
           </div>
         </section>
       )}
-
-
     </div>
   );
 };
 
 // Main QuantumTicTacToe Component
 const QuantumTicTacToe = () => {
-  const { t } = useLanguage();  // ← هذا موجود
   const gameHook = useGameState();
 
   return (
     <div className="quantum-tictactoe">
-      <LanguageSwitcher />
+      {/* Navbar with language switcher */}
+      <Navbar />
 
-      <header className="game-header">
-        <h1>{t('title')}</h1>
-        <p className="game-subtitle">{t('subtitle')}</p>
-      </header>
-
-
+      {/* Main game area */}
       <main className="game-main">
         <div className="game-layout">
-          <InstructionsPanel stats={gameHook.stats} />
-
+          {/* Game Board */}
           <div className="board-section">
             <GameBoard
               board={gameHook.board}
@@ -411,6 +304,7 @@ const QuantumTicTacToe = () => {
             />
           </div>
 
+          {/* Control Panel */}
           <div className="control-section">
             <ControlPanel
               gameState={gameHook.gameState}

@@ -80,4 +80,59 @@
     "helpRule3": "Cycles: When entanglements form loops, you must choose how to collapse",
     "helpRule4": "Winning: Get 3 classical marks in a row to win"
   }
+  ,
+
+  "introBanner": {
+    "title": "Quantum Computing",
+    "description": "Quantum computing uses quantum mechanics properties like superposition and entanglement to solve complex problems that are impossible for classical computers."
+  }
+  ,
+  "cardNav": {
+    "concepts": {
+      "title": "Quantum Concepts",
+      "superposition": "Superposition: Two states at once",
+      "entanglement": "Entanglement: Quantum correlation",
+      "collapse": "Collapse: Measurement effect"
+    },
+    "howToPlay": {
+      "title": "How to Play",
+      "step1": "Select 2 squares per move",
+      "step2": "Your mark exists in both",
+      "step3": "Collapse resolves positions"
+    },
+    "rules": {
+      "title": "Game Rules",
+      "rule1": "Each move uses 2 squares",
+      "rule2": "Cycles trigger collapse",
+      "rule3": "3 in a row wins"
+    }
+  }
+,
+  "navbar": {
+    "about": {
+      "title": "About Quantum Computing",
+      "description": "Quantum Tic-Tac-Toe demonstrates key quantum mechanics concepts through gameplay:",
+      "superposition": "Superposition",
+      "superpositionDesc": "A quantum move exists in two squares simultaneously until measured",
+      "entanglement": "Entanglement",
+      "entanglementDesc": "When moves share squares, they become quantum-correlated",
+      "collapse": "Collapse",
+      "collapseDesc": "Quantum states resolve to classical positions when cycles form"
+    },
+    "howToPlay": {
+      "title": "How to Play",
+      "step1": "Click two squares for each move - your mark will exist in both",
+      "step2": "Quantum marks are shown as small badges (X1, O2, etc.)",
+      "step3": "When cycles form in the entanglement graph, you'll choose a collapse order",
+      "step4": "Get 3 classical marks in a row to win"
+    },
+    "rules": {
+      "title": "Game Rules",
+      "rule1": "Each move places a quantum mark in two squares",
+      "rule2": "Cycles in entanglement trigger collapse to classical marks",
+      "rule3": "Only classical marks count toward winning",
+      "rule4": "First player to get 3 classical marks in a row wins"
+    }
+  }
+
 }
