@@ -4,6 +4,9 @@ import { useGameState } from '../hooks/useGameState';
 import { SQUARE_STATES } from '../types/gameTypes';
 import './QuantumTicTacToe.css';
 import Navbar from './Navbar';
+import Footer from './Footer';
+import './QuantumTicTacToe.css';
+import GuidePanel from './GuidePanel/GuidePanel';
 
 // GameBoard Component
 const GameBoard = ({
@@ -103,182 +106,6 @@ const GameBoard = ({
   );
 };
 
-// ControlPanel Component
-const ControlPanel = ({
-  gameState,
-  apiGameState,
-  stats,
-  isPlaying,
-  isWaitingCollapse,
-  isGameOver,
-  winner,
-  resetGame,
-  chooseCollapse,
-}) => {
-  const { t } = useLanguage();
-  const [showStats, setShowStats] = useState(false);
-
-  const renderGameStatus = () => {
-    if (isGameOver) {
-      if (winner) {
-        return (
-          <div className="status-card game-over">
-            <h3>{t('controlPanel.gameOver')}</h3>
-            <p className="winner-text">{t('controlPanel.playerWins', { player: winner })}</p>
-          </div>
-        );
-      } else {
-        return (
-          <div className="status-card game-over">
-            <h3>{t('controlPanel.gameOver')}</h3>
-            <p className="draw-text">{t('controlPanel.draw')}</p>
-            <p style={{ fontSize: '0.85rem', color: '#666' }}>
-              {t('controlPanel.drawReason')}
-            </p>
-          </div>
-        );
-      }
-    }
-
-    if (isWaitingCollapse) {
-      const cycleCreator = gameState.cycleCreator;
-      const choosingPlayer = gameState.collapseChooser || gameState.currentPlayer;
-
-      return (
-        <div className="status-card collapse-pending">
-          <h3>{t('controlPanel.quantumCollapse')}</h3>
-          <p>{t('controlPanel.cycleDetected')}</p>
-          {cycleCreator && (
-            <p>{t('controlPanel.createdCycle', { player: cycleCreator })}</p>
-          )}
-          <p>{t('controlPanel.chooseCollapse', { player: choosingPlayer })}</p>
-          <p style={{ fontSize: '0.8rem', color: '#666' }}>
-            {t('controlPanel.chooserNote')}
-          </p>
-        </div>
-      );
-    }
-
-    const currentPlayer = apiGameState?.current_player || gameState.currentPlayer;
-    const moveNumber = (apiGameState?.move_count || 0) + 1;
-
-    return (
-      <div className="status-card playing">
-        <h3>{t('controlPanel.gameInProgress')}</h3>
-        <p>{t('controlPanel.currentPlayer')} <strong>{currentPlayer}</strong></p>
-        <p>{t('controlPanel.moveNumber', { number: moveNumber })}</p>
-      </div>
-    );
-  };
-
-  const renderCollapseOptions = () => {
-    const options = gameState.collapseOptions || apiGameState?.collapseOptions || [];
-
-    if (!isWaitingCollapse || options.length === 0) {
-      return (
-        <div className="no-options">
-          <p style={{ textAlign: 'center', color: '#666', padding: '1rem' }}>
-            {t('controlPanel.generating')}
-          </p>
-          <button
-            className="control-btn reset-btn"
-            onClick={resetGame}
-            style={{ marginTop: '1rem', width: '100%' }}
-          >
-            Reset Game (If stuck)
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="collapse-section">
-        <h4>{t('controlPanel.collapseTitle')}</h4>
-        <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>
-          {t('controlPanel.collapseDescription')}
-        </p>
-        <div className="collapse-options">
-          {options.map((option, index) => (
-            <div key={index} className="collapse-option">
-              <div className="option-header">
-                <h5>{t('controlPanel.option', { number: index + 1 })}</h5>
-              </div>
-              <div className="option-assignments">
-                {Object.entries(option).map(([moveId, square]) => (
-                  <div key={moveId} className="assignment">
-                    <strong>{moveId}</strong> → square <strong>{square + 1}</strong>
-                  </div>
-                ))}
-              </div>
-              <button className="choose-btn" onClick={() => chooseCollapse(option)}>
-                ✓ {t('controlPanel.chooseThis')}
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="control-panel">
-      <div className="panel-header">
-        <h2>{t('controlPanel.title')}</h2>
-      </div>
-
-      <section className="status-section">
-        {renderGameStatus()}
-      </section>
-
-      {isWaitingCollapse && (
-        <section className="collapse-section-wrapper">
-          {renderCollapseOptions()}
-        </section>
-      )}
-
-      <section className="controls-section">
-        <h4>Game Controls</h4>
-        <div className="controls-grid">
-          <button className="control-btn reset-btn" onClick={resetGame}>
-            🔄 {t('controlPanel.resetGame')}
-          </button>
-
-          <button
-            className="control-btn toggle-btn"
-            onClick={() => setShowStats(!showStats)}
-          >
-            {showStats ? t('controlPanel.hideStats') : t('controlPanel.showStats')}
-          </button>
-        </div>
-      </section>
-
-      {showStats && (
-        <section className="stats-section">
-          <h4>Game Statistics</h4>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="stat-label">Total Moves:</span>
-              <span className="stat-value">{stats.totalMoves}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Quantum Moves:</span>
-              <span className="stat-value">{stats.quantumMoves}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Classical Moves:</span>
-              <span className="stat-value">{stats.classicalMoves}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Entanglements:</span>
-              <span className="stat-value">{stats.entanglements}</span>
-            </div>
-          </div>
-        </section>
-      )}
-    </div>
-  );
-};
-
 // Main QuantumTicTacToe Component
 const QuantumTicTacToe = () => {
   const gameHook = useGameState();
@@ -304,9 +131,9 @@ const QuantumTicTacToe = () => {
             />
           </div>
 
-          {/* Control Panel */}
+          {/* Guide Panel - Educational Interface */}
           <div className="control-section">
-            <ControlPanel
+            <GuidePanel
               gameState={gameHook.gameState}
               apiGameState={gameHook.apiGameState}
               stats={gameHook.stats}
@@ -315,13 +142,13 @@ const QuantumTicTacToe = () => {
               isGameOver={gameHook.isGameOver}
               winner={gameHook.winner}
               resetGame={gameHook.resetGame}
-              autoPlay={gameHook.autoPlay}
               chooseCollapse={gameHook.chooseCollapse}
-              autoCollapse={gameHook.autoCollapse}
+              selectedSquares={gameHook.selectedSquares}
             />
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

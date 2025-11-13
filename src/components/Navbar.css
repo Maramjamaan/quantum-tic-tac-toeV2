@@ -43,6 +43,15 @@
   font-weight: 800;
   color: #00d4ff;
   text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Cute Hover Animation - Same as Footer! */
+.logo-icon:hover {
+  transform: translateY(-3px) rotate(5deg);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  border-color: rgba(0, 212, 255, 0.5);
 }
 
 .logo-text {
