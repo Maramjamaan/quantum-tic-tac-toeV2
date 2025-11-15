@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import logging
+import os
 
 # Import our quantum game engine
 from quantum_game import QuantumTicTacToe, create_game
@@ -24,19 +25,22 @@ app = FastAPI(
 )
 
 # Enable CORS so React can talk to this API
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS", 
+    "http://localhost:3000,http://localhost:3001"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your React app URL
+    allow_origins=ALLOWED_ORIGINS,  
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"], 
+    allow_headers=["Content-Type", "Authorization"], 
 )
 
 # ==========================================
 # GLOBAL GAME INSTANCE
 # ==========================================
-# In production, you'd use a database or session management
-# For now, we'll use a single game instance
 game_instance: Optional[QuantumTicTacToe] = None
 
 
@@ -154,13 +158,6 @@ def make_quantum_move(request: QuantumMoveRequest):
     """
     Make a quantum move
     Places a quantum mark in two squares simultaneously
-    
-    Args:
-        square1: First square (0-8)
-        square2: Second square (0-8)
-    
-    Returns:
-        Move result with entanglements and cycle detection
     """
     try:
         game = get_game()
@@ -188,6 +185,21 @@ def make_quantum_move(request: QuantumMoveRequest):
             )
         
         logger.info(f"Quantum move made: {request.square1}, {request.square2}")
+        
+        # ✅ If cycle detected, generate collapse options
+        if result.get('cycle_detected'):
+            logger.info('🌀 Cycle detected, generating collapse options...')
+            
+            # ✅ Generate 3-5 options (reasonable number)
+            collapse_options = game.generate_collapse_options(max_options=4)
+            
+            logger.info(f'✅ Generated {len(collapse_options)} unique collapse options')
+            
+            # Log each option for debugging
+            for i, option in enumerate(collapse_options, 1):
+                logger.info(f'  Option {i}: {option}')
+            
+            result['collapse_options'] = collapse_options
         
         return result
         
@@ -219,16 +231,18 @@ def collapse_moves(request: CollapseMoveRequest):
                 detail="Must provide collapse option"
             )
         
+        logger.info(f"Collapsing with option: {request.collapse_option}")
+        
         # Collapse the moves with chosen squares
         result = game.collapse_with_choice(request.collapse_option)
         
-        logger.info(f"Moves collapsed with choice: {request.collapse_option}")
+        logger.info(f"✅ Collapse successful!")
         logger.info(f"Results: {result['collapse_results']}")
         
         return result
         
     except Exception as e:
-        logger.error(f"Error collapsing moves: {e}")
+        logger.error(f"❌ Error collapsing moves: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -236,23 +250,50 @@ def collapse_moves(request: CollapseMoveRequest):
 def check_winner():
     """
     Check if there's a winner or a draw
+    Returns:
+        - winner: 'X', 'O', or None
+        - is_draw: True/False
+        - game_over: True if game ended
+        - board: Current board state
+        - winning_line: Indices of winning squares [0-8] if winner exists
     """
     try:
         game = get_game()
         winner = game.check_winner()
         is_draw = game.check_for_draw()
         
+        # Find the winning line if there's a winner
+        winning_line = []
+        if winner:
+            winning_combinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
+                [0, 4, 8], [2, 4, 6]               # Diagonals
+            ]
+            
+            board = game.game_state.board
+            
+            for combo in winning_combinations:
+                if (board[combo[0]] == board[combo[1]] == board[combo[2]] == winner):
+                    winning_line = combo
+                    logger.info(f"🏆 Winning line found: {combo} for player {winner}")
+                    break
+        
+        logger.info(f"Check winner result: winner={winner}, draw={is_draw}, line={winning_line}")
+        
         return {
             "success": True,
             "winner": winner,
             "is_draw": is_draw,
             "game_over": winner is not None or is_draw,
-            "board": game.game_state.board
+            "board": game.game_state.board,
+            "winning_line": winning_line
         }
         
     except Exception as e:
         logger.error(f"Error checking winner: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/game/entanglements")
 def get_entanglements():
@@ -290,9 +331,11 @@ def get_moves():
 if __name__ == "__main__":
     import uvicorn
     
-    print("Starting Quantum Tic-Tac-Toe API Server...")
-    print("Server will run at: http://localhost:8000")
-    print("API docs at: http://localhost:8000/docs")
+    print("=" * 50)
+    print(" Starting Quantum Tic-Tac-Toe API Server...")
+    print("=" * 50)
+    print(" Server: http://localhost:8000")
+    print(" API Docs: http://localhost:8000/docs")
     print("Ready to play!\n")
     
     uvicorn.run(

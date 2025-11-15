@@ -623,45 +623,122 @@ class QuantumTicTacToe:
             return True
         
         return False
-    def generate_collapse_options(self, max_options=3):
-        """Generate valid collapse options using backtracking"""
-        # Get uncollapsed moves
+    def generate_collapse_options(self, max_options=5):
+        """
+        Generate ALL valid collapse options with MAXIMUM DIVERSITY
+        
+        This ensures each move appears in different squares across options.
+        Uses complete backtracking to explore all possibilities, then selects
+        the most diverse options.
+        
+        Args:
+            max_options: Maximum number of options to return (default 5)
+            
+        Returns:
+            List of dictionaries, each mapping move_id to square
+            Example: [{'X1': 1, 'O2': 5}, {'X1': 2, 'O2': 4}, ...]
+        """
+        # Get all uncollapsed moves
         uncollapsed = [m for m in self.game_state.moves if not m.collapsed]
         
         if not uncollapsed:
+            logger.warning("No uncollapsed moves to generate options for")
             return []
         
+        logger.info(f"Generating collapse options for {len(uncollapsed)} uncollapsed moves:")
+        for move in uncollapsed:
+            logger.info(f"  {move.move_id}: squares {move.squares}")
+        
+        # Store ALL valid options
         all_options = []
         
         def backtrack(move_index, current_option, used_squares):
-            # If we assigned all moves, save this option
+            """
+            Recursive backtracking to find ALL valid collapse combinations
+            
+            Args:
+                move_index: Current move we're assigning
+                current_option: Current partial assignment {move_id: square}
+                used_squares: Set of squares already used in this option
+            """
+            # Base case: all moves assigned successfully
             if move_index == len(uncollapsed):
+                # Save this valid option
                 all_options.append(current_option.copy())
                 return
             
-            # Stop if we have enough options
-            if len(all_options) >= max_options:
-                return
-            
+            # Get current move
             move = uncollapsed[move_index]
             
-            # Try both squares for this move
+            # Try EACH square this move can collapse to
             for square in move.squares:
-                if square not in used_squares:
-                    # Assign this square
-                    current_option[move.move_id] = square
-                    used_squares.add(square)
-                    
-                    # Try next move
-                    backtrack(move_index + 1, current_option, used_squares)
-                    
-                    # Undo (backtrack)
-                    del current_option[move.move_id]
-                    used_squares.remove(square)
+                # Skip if this square is already used by another move
+                if square in used_squares:
+                    continue
+                
+                # Assign this square to current move
+                current_option[move.move_id] = square
+                used_squares.add(square)
+                
+                # Recurse to assign next move
+                backtrack(move_index + 1, current_option, used_squares)
+                
+                # Backtrack: undo this assignment
+                del current_option[move.move_id]
+                used_squares.remove(square)
         
-        # Start backtracking
+        # Start the backtracking algorithm
         backtrack(0, {}, set())
-        return all_options
+        
+        logger.info(f" Generated {len(all_options)} total valid combinations")
+        
+        # If we have few options, return them all
+        if len(all_options) <= max_options:
+            for i, option in enumerate(all_options, 1):
+                logger.info(f"  Option {i}: {option}")
+            return all_options
+        
+        #  DIVERSITY SELECTION: Pick the most diverse options
+        # We want each move to appear in different squares across options
+        
+        selected_options = []
+        
+        # Always include the first option
+        selected_options.append(all_options[0])
+        
+        # Select remaining options to maximize diversity
+        for _ in range(min(max_options - 1, len(all_options) - 1)):
+            best_option = None
+            max_diversity_score = -1
+            
+            # Find option that differs most from already selected options
+            for candidate in all_options:
+                # Skip if already selected
+                if candidate in selected_options:
+                    continue
+                
+                # Calculate diversity score
+                diversity_score = 0
+                for selected in selected_options:
+                    for move_id in candidate:
+                        # +1 point for each move that's in a different square
+                        if candidate[move_id] != selected.get(move_id):
+                            diversity_score += 1
+                
+                # Keep track of best option
+                if diversity_score > max_diversity_score:
+                    max_diversity_score = diversity_score
+                    best_option = candidate
+            
+            # Add the most diverse option found
+            if best_option:
+                selected_options.append(best_option)
+        
+        logger.info(f"Selected {len(selected_options)} diverse options:")
+        for i, option in enumerate(selected_options, 1):
+            logger.info(f"  Option {i}: {option}")
+        
+        return selected_options
     
     def reset_game(self):
         """Reset game to initial state"""

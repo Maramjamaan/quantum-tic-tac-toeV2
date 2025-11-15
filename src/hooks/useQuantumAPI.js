@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import config from '../config';
+
 
 export const useQuantumAPI = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  const API_URL = 'http://localhost:8000';
+  const API_URL = config.apiUrl;
 
   const makeQuantumMove = async (square1, square2) => {
     setLoading(true);

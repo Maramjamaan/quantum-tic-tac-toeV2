@@ -147,4 +147,13 @@
     "title": "Quantum Computing: The Future of Technology",
     "description": "Quantum computing exploits the strange laws of quantum mechanics—like superposition and quantum entanglement—to solve complex mathematical problems that are impossible for traditional computers to solve even if they ran for millions of years. It's not just faster computers, but a completely different way of processing information!"
   }
+  ,
+  "errors": {
+    "serverDown": "Connection failed. Make sure Backend is running",
+    "moveFailure": "Failed to execute move. Try again",
+    "collapseFailure": "Failed to execute collapse. Try again",
+    "resetFailure": "Failed to reset game. Try again",
+    "noSquaresAvailable": "No squares available for quantum moves",
+    "genericError": "An unexpected error occurred"
+  }
 }
