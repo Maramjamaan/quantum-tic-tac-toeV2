@@ -3,7 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import './Footer.css';
 
 const Footer = () => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
 
   return (
     <footer className="footer">

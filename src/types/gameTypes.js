@@ -1,55 +1,65 @@
+
 /**
- * Type definitions for Quantum Tic-Tac-Toe
- * Based on Allan Goff's paper
+ * Game Type Definitions
+ *  Based on Allan Goff's paper
+ * Central place for all game-related constants and types
  */
 
-// Basic enums
+
+
+
+// PLAYERS
+
 export const PLAYERS = {
   X: 'X',
   O: 'O'
 };
-
+// MOVE TYPES
 export const MOVE_TYPES = {
   QUANTUM: 'quantum',
   CLASSICAL: 'classical'
 };
 
+
+// GAME STATUS
 export const GAME_STATUS = {
-  PLAYING: 'playing',
-  WAITING_COLLAPSE: 'waiting_collapse',
+  // are in one of these states during gameplay
+  PLAYING: 'playing',// start of game or ongoing
+  WAITING_COLLAPSE: 'waiting_collapse', // occures when a cycle is detected
   X_WINS: 'x_wins',
   O_WINS: 'o_wins',
-  DRAW: 'draw'
+  DRAW: 'draw'// no more moves possible and no winner
 };
 
+// SQUARE STATES
 export const SQUARE_STATES = {
-  EMPTY: 'empty',
-  QUANTUM: 'quantum',
-  CLASSICAL: 'classical',
-  SELECTED: 'selected'
+  QUANTUM: 'quantum', // contains quantum moves
+  CLASSICAL: 'classical', // one move after collapse 
 };
 
-// Quantum move - exists in 2 squares until collapsed
+// Quantum move class 
 export class QuantumMove {
   constructor(player, moveNum, squares) {
+    // check squares validity
     if (squares.length !== 2 || squares[0] === squares[1]) {
       throw new Error('Invalid quantum move: must be exactly 2 different squares');
     }
     
-    this.id = `${player}${moveNum}`;
-    this.player = player;
-    this.moveNumber = moveNum;
-    this.squares = squares.sort();
-    this.collapsed = false;
-    this.finalSquare = null;
-    this.timestamp = Date.now();
+    this.id = `${player}${moveNum}`; // e.g., "X1", "O2"
+    this.player = player;// 'X' or 'O'
+    this.moveNumber = moveNum;// sequential move number for the player
+    this.squares = squares.sort();// always store in sorted order
+    this.collapsed = false;// has this move been collapsed?
+    this.finalSquare = null;// if collapsed, which square it settled on
+    this.timestamp = Date.now();// move creation time
   }
 
+  //check if move are in a given square
   hasSquare(sq) {
     return this.squares.includes(sq);
   }
 
-  // Add this method
+  // collapse move to a specific square
   collapse(sq) {
     if (!this.hasSquare(sq)) {
       throw new Error(`Move ${this.id} cannot collapse to square ${sq}`);
@@ -57,13 +67,15 @@ export class QuantumMove {
     this.collapsed = true;
     this.finalSquare = sq;
   }
-
+  // get the second square 
   getOtherSquare(sq) {
     if (!this.hasSquare(sq)) return null;
     return this.squares.find(s => s !== sq);
   }
 }
-// Classical move - definite position after collapse or direct play
+
+
+// Classical move class - definite position after collapse or direct play
 export class ClassicalMove {
   constructor(player, square, fromQuantumId = null) {
     this.id = `${player}_classical_${square}_${Date.now()}`;
@@ -86,11 +98,11 @@ export class Entanglement {
     this.sharedSquare = sharedSquare;
     this.timestamp = Date.now();
   }
-
+  // check if a move is part of this entanglement
   involves(moveId) {
     return this.move1Id === moveId || this.move2Id === moveId;
   }
-
+  // get the other move in the entanglement
   getOther(moveId) {
     if (this.move1Id === moveId) return this.move2Id;
     if (this.move2Id === moveId) return this.move1Id;
@@ -102,10 +114,10 @@ export class Entanglement {
 export class EntanglementCycle {
   constructor(moveIds, entanglements, triggerMoveId) {
     this.id = `cycle_${Date.now()}`;
-    this.moveIds = moveIds;
-    this.entanglements = entanglements;
-    this.triggerMoveId = triggerMoveId;
-    this.triggerPlayer = triggerMoveId.charAt(0);
+    this.moveIds = moveIds; // array of move IDs in the cycle
+    this.entanglements = entanglements;// array of Entanglement objects forming the cycle
+    this.triggerMoveId = triggerMoveId;// move that caused cycle detection
+    this.triggerPlayer = triggerMoveId.charAt(0);// 'X' or 'O' that triggered the cycle
     this.timestamp = Date.now();
   }
 
@@ -113,7 +125,7 @@ export class EntanglementCycle {
   getCollapsePlayer() {
     return this.triggerPlayer === PLAYERS.X ? PLAYERS.O : PLAYERS.X;
   }
-
+  // number of moves in the cycle
   size() {
     return this.moveIds.length;
   }
@@ -124,7 +136,7 @@ export class CollapseOption {
   constructor(cycleId, moveAssignments) {
     this.id = `option_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
     this.cycleId = cycleId;
-    this.assignments = new Map(moveAssignments); // moveId -> square
+    this.assignments = new Map(moveAssignments); // Map of moveId -> square
     this.score = 0; // evaluation score
   }
 
@@ -153,28 +165,30 @@ export const createGameState = () => ({
   history: []
 });
 
-// Square data structure
+// make empty square
 export const createSquare = () => ({
   quantumMoveIds: [],
   classicalMoveId: null,
   state: SQUARE_STATES.EMPTY
 });
 
-// Create empty board
-export const createBoard = () => Array(9).fill().map(() => createSquare());
+//make empty board
+export const createBoard = () => 
+  Array(9).fill().map(() => createSquare());
 
-// Validation functions
+// make sure square index is valid
 export const isValidSquare = (sq) => 
   Number.isInteger(sq) && sq >= 0 && sq <= 8;
 
+// make sure its the valid player
 export const isValidPlayer = (player) => 
   player === PLAYERS.X || player === PLAYERS.O;
-
+// make sure that quantum move squares are valid
 export const isValidQuantumMove = (squares) =>
-  Array.isArray(squares) && 
-  squares.length === 2 && 
-  squares.every(isValidSquare) && 
-  squares[0] !== squares[1];
+  Array.isArray(squares) && // must be an array
+  squares.length === 2 && // exactly 2 squares
+  squares.every(isValidSquare) && // each square valid
+  squares[0] !== squares[1];// squares must be different
 
 // Action types for state management
 export const ACTIONS = {
@@ -188,7 +202,7 @@ export const ACTIONS = {
   RESET_GAME: 'RESET_GAME'
 };
 
-// Game constants
+// Other game constants
 export const BOARD_SIZE = 9;
 export const WINNING_LINES = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
@@ -197,3 +211,10 @@ export const WINNING_LINES = [
 ];
 export const MAX_QUANTUM_PER_SQUARE = 8;
 export const MIN_MOVES_FOR_CYCLE = 3;
+
+
+
+/*
+هذا الملف يحتوي على التعريفات المركزية للعبة، مبني على ورقة 
+بحثية لـ Allan Goff. يشمل الثوابت، الـ Classes للكائنات، 
+ودوال المساعدة اللازمة لإدارة حالة اللعبة.*/

@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import config from '../config';
+import Logger from '../utils/logger';
 
-
+// Hook definition
 export const useQuantumAPI = () => {
+  // State for loading and error handling
   const [loading, setLoading] = useState(false);
+  //important for debugging API issues
   const [error, setError] = useState(null);
   
+  //get the API URL from config
   const API_URL = config.apiUrl;
 
+  // API Function to make a quantum move
   const makeQuantumMove = async (square1, square2) => {
     setLoading(true);
     setError(null);
@@ -27,14 +32,15 @@ export const useQuantumAPI = () => {
       setLoading(false);
       return result;
     } catch (err) {
-      console.error('API Error:', err);
+      Logger.error('API Error:', err);
       setError(err.message);
       setLoading(false);
       return null;
     }
   };
-
+// API Function to collapse a quantum move
   const collapseMove = async (collapseOption) => {
+    
     setLoading(true);
     setError(null);
     
@@ -53,7 +59,7 @@ export const useQuantumAPI = () => {
       setLoading(false);
       return result;
     } catch (err) {
-      console.error('Collapse Error:', err);
+      Logger.error('Collapse Error:', err);
       setError(err.message);
       setLoading(false);
       return null;
@@ -72,7 +78,7 @@ export const useQuantumAPI = () => {
       
       return await response.json();
     } catch (err) {
-      console.error('Reset Error:', err);
+      Logger.error('Reset Error:', err);
       setError(err.message);
       return null;
     }
@@ -86,12 +92,13 @@ export const useQuantumAPI = () => {
       }
       return await response.json();
     } catch (err) {
-      console.error('Get State Error:', err);
+      Logger.error('Get State Error:', err);
       setError(err.message);
       return null;
     }
   };
-const checkWinner = async () => {
+
+  const checkWinner = async () => {
     try {
       const response = await fetch(`${API_URL}/game/winner`);
       
@@ -101,11 +108,12 @@ const checkWinner = async () => {
       
       return await response.json();
     } catch (err) {
-      console.error('Check Winner Error:', err);
+      Logger.error('Check Winner Error:', err);
       setError(err.message);
       return null;
     }
   };
+
   return { 
     makeQuantumMove, 
     collapseMove, 

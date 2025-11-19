@@ -13,22 +13,22 @@
     "about": {
       "title": "Quantum Computing: From Theory to Reality",
       
-      "history": "In 1982, renowned physicist Richard Feynman proposed a revolutionary idea that would change the course of computer science: building a computer based on the laws of quantum mechanics instead of classical physics. Feynman realized that simulating quantum systems on traditional computers was nearly impossible—a single atom might require a universe-sized computer to simulate accurately! Thus, the concept of quantum computing was born, and today we're witnessing its practical applications.",
+      "history": "In 1982, renowned physicist Richard Feynman proposed a revolutionary idea that would change the course of computer science: building a computer based on the laws of quantum mechanics instead of classical physics. Feynman realized that simulating quantum systems on traditional computers was nearly impossible a single atom might require a universe-sized computer to simulate accurately! Thus, the concept of quantum computing was born, and today we're witnessing its practical applications.",
       
-      "present": "In our current era, quantum computing is no longer just theory on paper. Tech giants like IBM, Google, and Microsoft are racing to develop real quantum computers. In 2019, Google achieved a historic milestone they called 'Quantum Supremacy,' where their quantum computer completed a complex calculation in just 200 seconds—a task that would take the world's most powerful traditional supercomputer 10,000 years!",
+      "present": "In our current era, quantum computing is no longer just theory on paper. Tech giants like IBM, Google, and Microsoft are racing to develop real quantum computers. In 2019, Google achieved a historic milestone they called 'Quantum Supremacy,' where their quantum computer completed a complex calculation in just 200 seconds a task that would take the world's most powerful traditional supercomputer 10,000 years!",
       
       "future": "The future that quantum computing promises is truly astounding. Scientists predict it will revolutionize critical fields: discovering new medicines through precise simulation of molecules and proteins, developing encryption systems that are absolutely unbreakable, enhancing artificial intelligence and machine learning algorithms, solving complex optimization problems in logistics and finance, and contributing to a deeper understanding of climate change and weather prediction.",
       
       "concepts": "Fundamental Principles of Quantum Mechanics:",
       
       "superposition": "Quantum Superposition",
-      "superpositionDesc": "In our classical world, a computer bit is either 0 or 1—no third option. But in the strange quantum world, a qubit can be both 0 AND 1 simultaneously! Imagine a coin spinning in mid-air—while spinning, it's both heads and tails at once, settling on one only when it lands. This amazing ability to exist in multiple states at once is the secret behind the massive computational power of quantum computers.",
+      "superpositionDesc": "In our classical world, a computer bit is either 0 or 1 no third option. But in the strange quantum world, a qubit can be both 0 AND 1 simultaneously! Imagine a coin spinning in mid-air while spinning, it's both heads and tails at once, settling on one only when it lands. This amazing ability to exist in multiple states at once is the secret behind the massive computational power of quantum computers.",
       
       "entanglement": "Quantum Entanglement",
-      "entanglementDesc": "Albert Einstein described this as 'spooky action at a distance' because it seemed impossible to him! When two qubits become entangled, the state of one becomes intimately connected to the other, regardless of the distance separating them—even if they're on opposite ends of the universe! Measuring one immediately affects the other. This mysterious and puzzling connection is one of the most powerful tools quantum computers have for processing complexly correlated information.",
+      "entanglementDesc": "Albert Einstein described this as 'spooky action at a distance' because it seemed impossible to him! When two qubits become entangled, the state of one becomes intimately connected to the other, regardless of the distance separating them even if they're on opposite ends of the universe! Measuring one immediately affects the other. This mysterious and puzzling connection is one of the most powerful tools quantum computers have for processing complexly correlated information.",
       
       "collapse": "Quantum Collapse",
-      "collapseDesc": "One of the strangest phenomena in quantum mechanics: when we attempt to 'measure' or 'observe' a quantum particle in superposition, it immediately collapses and settles into one definite state. Like a spinning coin that suddenly lands on heads or tails. This is Heisenberg's famous uncertainty principle: the very act of observation and measurement changes the outcome! This makes programming quantum computers a unique and exciting challenge—you cannot 'monitor' what's happening inside without affecting the results."
+      "collapseDesc": "One of the strangest phenomena in quantum mechanics: when we attempt to 'measure' or 'observe' a quantum particle in superposition, it immediately collapses and settles into one definite state. Like a spinning coin that suddenly lands on heads or tails. This is Heisenberg's famous uncertainty principle: the very act of observation and measurement changes the outcome! This makes programming quantum computers a unique and exciting challenge you cannot 'monitor' what's happening inside without affecting the results."
     },
     
     "howToPlay": {
@@ -37,23 +37,23 @@
       "intro": "Forget everything you know about traditional tic-tac-toe! In this revolutionary quantum version, the laws of quantum mechanics apply to every move you make. You'll experience firsthand how quantum physicists think, and you'll understand how quantum computers work in a practical and fun way.",
       
       "step1Title": "First Move: Enter the World of Quantum Superposition",
-      "step1": "In the classical game, you place your mark in one square. But here, you'll select two squares! Your mark will enter 'quantum superposition'—meaning it will actually exist in both squares at the same moment. Just like a qubit can be in states 0 and 1 simultaneously. Your quantum move will be numbered (like X1 or O2) and will appear as a small badge in both squares you selected.",
+      "step1": "In the classical game, you place your mark in one square. But here, you'll select two squares! Your mark will enter 'quantum superposition' meaning it will actually exist in both squares at the same moment. Just like a qubit can be in states 0 and 1 simultaneously. Your quantum move will be numbered (like X1 or O2) and will appear as a small badge in both squares you selected.",
       
       "step2Title": "Watch Entanglement Form Before Your Eyes",
-      "step2": "As the game continues and moves are exchanged between you and your opponent, quantum entanglement will begin to appear. When two players choose a shared square in their moves, these moves become entangled—quantum-correlated. You'll notice some squares contain more than one badge (like X1 and O2 together)—this means these moves are entangled. Entanglement means the fate of one move will affect the other during collapse.",
+      "step2": "As the game continues and moves are exchanged between you and your opponent, quantum entanglement will begin to appear. When two players choose a shared square in their moves, these moves become entangled quantum-correlated. You'll notice some squares contain more than one badge (like X1 and O2 together) this means these moves are entangled. Entanglement means the fate of one move will affect the other during collapse.",
       
       "step3Title": "The Moment of Truth: Quantum Collapse",
       "step3": "When a 'cycle' forms in the entanglement network (a closed loop of moves entangled with each other), inevitable quantum collapse occurs! Now all entangled quantum states must be 'measured.' The player who didn't complete the cycle (the opponent of whoever made the last move that closed the loop) chooses how these moves will collapse. They'll see several possible options, each specifying which square each quantum move will settle into as a fixed classical mark.",
       
       "step4Title": "The Path to Victory Through Collapse",
-      "step4": "The ultimate goal remains the same as in classical tic-tac-toe: get three marks in a row—horizontal, vertical, or diagonal. But there's a fundamental difference: only classical marks (those that have collapsed from quantum state to a definite position) count toward winning. Moves still in quantum superposition don't count! This makes the game more complex and strategic—you need to think ahead about how to force collapses in your favor."
+      "step4": "The ultimate goal remains the same as in classical tic-tac-toe: get three marks in a row horizontal, vertical, or diagonal. But there's a fundamental difference: only classical marks (those that have collapsed from quantum state to a definite position) count toward winning. Moves still in quantum superposition don't count! This makes the game more complex and strategic you need to think ahead about how to force collapses in your favor."
     },
     
     "rules": {
       "title": "Detailed Rules: Deep Understanding of the Game",
       
       "rule1Title": "The Fundamental Quantum Move Rule",
-      "rule1": "Every move you make is inherently quantum in nature. You must—and you absolutely must—select exactly two squares, no more and no less. Your mark (X or O followed by a sequential move number, like X1 or O2) will be placed in both selected squares in quantum superposition. You cannot break this rule by selecting just one square, nor can you select three or more squares. This reflects the nature of qubits that need two states to superpose between.",
+      "rule1": "Every move you make is inherently quantum in nature. You must and you absolutely must select exactly two squares, no more and no less. Your mark (X or O followed by a sequential move number, like X1 or O2) will be placed in both selected squares in quantum superposition. You cannot break this rule by selecting just one square, nor can you select three or more squares. This reflects the nature of qubits that need two states to superpose between.",
       
       "rule2Title": "The Entanglement and Quantum Correlation Rule",
       "rule2": "When two or more quantum moves share the same square, these moves enter a state of 'quantum entanglement.' Entanglement means the fate of one move becomes intimately linked to the fate of other entangled moves. If one collapses to a specific position, this will automatically affect the probabilities of how other moves collapse. This principle accurately reflects the real quantum entanglement phenomenon that has puzzled physicists for decades.",
@@ -62,10 +62,10 @@
       "rule3": "When entangled moves form a 'cycle' or 'closed loop' in the entanglement network (meaning move A is entangled with B, B is entangled with C, and C is entangled back with A, forming a loop), immediate and mandatory quantum collapse occurs. The player who didn't create this cycle (the opponent of whoever placed the last move completing the loop) chooses from available collapse options. Each collapse option shows exactly which square each quantum move will settle into as a fixed classical mark.",
       
       "rule4Title": "The Victory and Classical Marks Rule",
-      "rule4": "To win the game, you must get three classical marks (marks that have collapsed from quantum state and are now in definite, fixed positions) in a row—in one row, column, or diagonal. Moves still in quantum state (superposition) absolutely don't count toward winning. If all squares fill up without either player achieving three consecutive classical marks, the game ends in a draw—a rare but possible outcome!",
+      "rule4": "To win the game, you must get three classical marks (marks that have collapsed from quantum state and are now in definite, fixed positions) in a row in one row, column, or diagonal. Moves still in quantum state (superposition) absolutely don't count toward winning. If all squares fill up without either player achieving three consecutive classical marks, the game ends in a draw a rare but possible outcome!",
       
       "rule5Title": "The Restriction and Forbidden Squares Rule",
-      "rule5": "You cannot—under any circumstances—select a square that already contains a classical mark (collapsed and position-definite). You can only select completely empty squares, or squares containing quantum moves (not yet collapsed). This rule mimics an important physical reality: quantum measurement is final and irreversible—once a quantum state collapses and becomes classical, it cannot be returned to quantum superposition again."
+      "rule5": "You cannot under any circumstances select a square that already contains a classical mark (collapsed and position-definite). You can only select completely empty squares, or squares containing quantum moves (not yet collapsed). This rule mimics an important physical reality: quantum measurement is final and irreversible once a quantum state collapses and becomes classical, it cannot be returned to quantum superposition again."
     }
   },
 
@@ -85,8 +85,8 @@
       "action": " What You Need to Do Now:",
       "actionDesc": "Select the first square where you want to place your quantum mark",
       "why": "Why Are You Doing This?",
-      "whyDesc": "Your mark {{moveId}} will enter an amazing quantum superposition state—it will exist in two different squares at the same moment! Just like how qubits work in real quantum computers.",
-      "next": "After selecting the first square, you'll need to choose a second square to complete your quantum move. Think carefully about the positions of both squares—can they form a potential winning line?"
+      "whyDesc": "Your mark {{moveId}} will enter an amazing quantum superposition state it will exist in two different squares at the same moment! Just like how qubits work in real quantum computers.",
+      "next": "After selecting the first square, you'll need to choose a second square to complete your quantum move. Think carefully about the positions of both squares can they form a potential winning line?"
     },
     
     "secondSquare": {
@@ -104,16 +104,16 @@
       "whatDesc": "A cycle has formed in the entanglement network! This means a closed loop of entangled moves has been completed, and now all quantum states linked to this cycle must be 'measured' to collapse into definite classical positions.",
       "creator": "Player {{player}} completed the cycle with their last move",
       "action": " What You Need to Do Now:",
-      "actionDesc": "{{player}}, you now have the power to choose how the quantum states collapse! Choose wisely—your decision will determine where each quantum mark settles to become a fixed classical mark.",
+      "actionDesc": "{{player}}, you now have the power to choose how the quantum states collapse! Choose wisely your decision will determine where each quantum mark settles to become a fixed classical mark.",
       "why": "Why Does This Collapse Happen?",
       "whyDesc": "In real quantum mechanics, when a cycle of entangled states forms, a logical paradox occurs that forces the system to collapse and stabilize. This reflects the 'quantum measurement' principle where observation forces particles to choose a definite state. In our game, the player who didn't create the cycle acts as the 'observer' who determines the measurement outcome!",
       "optionsTitle": "Available Collapse Options:",
-      "optionsDesc": "Each option below represents a different way the quantum moves can collapse. Study the options carefully and choose what best fits your strategy—do you want to form a winning line? Or do you want to prevent your opponent from winning?",
+      "optionsDesc": "Each option below represents a different way the quantum moves can collapse. Study the options carefully and choose what best fits your strategy do you want to form a winning line? Or do you want to prevent your opponent from winning?",
       "option": "Option {{number}}",
       "square": "Square {{number}}",
       "chooseThis": "Choose This Collapse",
       "generating": "Calculating all possible collapse options...",
-      "chooserNote": "Note: The player opposite to whoever created the cycle always chooses how to collapse—this adds deep strategic dimension to the game!"
+      "chooserNote": "Note: The player opposite to whoever created the cycle always chooses how to collapse this adds deep strategic dimension to the game!"
     },
     
     "victory": {
@@ -145,7 +145,7 @@
 
   "introBanner": {
     "title": "Quantum Computing: The Future of Technology",
-    "description": "Quantum computing exploits the strange laws of quantum mechanics—like superposition and quantum entanglement—to solve complex mathematical problems that are impossible for traditional computers to solve even if they ran for millions of years. It's not just faster computers, but a completely different way of processing information!"
+    "description": "Quantum computing exploits the strange laws of quantum mechanics like superposition and quantum entanglement to solve complex mathematical problems that are impossible for traditional computers to solve even if they ran for millions of years. It's not just faster computers, but a completely different way of processing information!"
   }
   ,
   "errors": {

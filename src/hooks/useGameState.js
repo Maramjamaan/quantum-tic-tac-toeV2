@@ -7,6 +7,7 @@ import { MIN_SQUARES_FOR_MOVE, COLLAPSE_DELAY } from '../constants/gameConstants
 import { useState, useCallback, useEffect } from 'react';
 import { PLAYERS, GAME_STATUS, SQUARE_STATES, createGameState } from '../types/gameTypes.js';
 import { useQuantumAPI } from './useQuantumAPI.js';
+import Logger from '../utils/logger';
 
 // ==========================================
 // HELPER FUNCTIONS
@@ -30,7 +31,7 @@ function buildBoardFromAPI(apiGameState) {
         board[index].state = SQUARE_STATES.CLASSICAL;
         board[index].quantumMoveIds = [];
 
-        console.log(`Square ${index}: Classical ${player}`);
+        Logger.debug(`Square ${index}: Classical ${player}`);
       }
     });
   }
@@ -49,7 +50,7 @@ function buildBoardFromAPI(apiGameState) {
     });
   }
 
-  console.log('Built board:', board.map((sq, i) => `${i}: ${sq.state} - ${sq.classicalMoveId}`));
+  Logger.debug('Built board:', board.map((sq, i) => `${i}: ${sq.state} - ${sq.classicalMoveId}`));
 
   return board;
 }
@@ -121,8 +122,8 @@ export const useGameState = () => {
 
     if (result && result.success) {
       if (result.winner) {
-        console.log(' Winner detected:', result.winner);
-        console.log(' Winning line:', result.winning_line);
+        Logger.info('Winner detected:', result.winner);
+        Logger.info('Winning line:', result.winning_line);
 
         setGameState(prev => ({
           ...prev,
@@ -132,7 +133,7 @@ export const useGameState = () => {
         }));
         return true;
       } else if (result.is_draw) {
-        console.log(' Draw detected!');
+        Logger.info('Draw detected!');
 
         setGameState(prev => ({
           ...prev,
@@ -155,7 +156,7 @@ export const useGameState = () => {
     ).length;
 
     if ((emptyCount < MIN_SQUARES_FOR_MOVE)) {
-      console.log(`Less than 2 empty squares (${emptyCount}) - checking game end`);
+      Logger.warn(`Less than 2 empty squares (${emptyCount}) - checking game end`);
 
       await checkWinner();
 
@@ -182,13 +183,13 @@ export const useGameState = () => {
     );
 
     if (availableSquares.length === 0) {
-      console.log('⚠️ No squares available for quantum moves');
+      Logger.warn('No squares available for quantum moves');
       setUserError('ERROR_NO_SQUARES');
       await checkGameEnd();
       return;
     }
 
-    console.log('Making quantum move:', squares);
+    Logger.info('Making quantum move:', squares);
 
     try {
       const result = await api.makeQuantumMove(squares[0], squares[1]);
@@ -200,14 +201,14 @@ export const useGameState = () => {
       }
 
       if (result && result.success) {
-        console.log('✓ Move successful');
+        Logger.success('Move successful');
 
         setApiGameState(result.game_state);
 
         if (result.cycle_detected) {
-          console.log(' Cycle detected!');
-          console.log('Cycle creator:', result.cycle_creator);
-          console.log('Collapse chooser:', result.collapse_chooser);
+          Logger.info('Cycle detected!');
+          Logger.info('Cycle creator:', result.cycle_creator);
+          Logger.info('Collapse chooser:', result.collapse_chooser);
 
           const collapseOptions = result.collapse_options || [];
 
@@ -249,13 +250,13 @@ export const useGameState = () => {
         setSelectedSquares([]);
 
       } else {
-        console.error(' Move failed');
+        Logger.error('Move failed');
         setUserError(result.error || 'ERROR_MOVE_FAILURE');
         setSelectedSquares([]);
       }
 
     } catch (error) {
-      console.error(' Error in executeQuantumMove:', error);
+      Logger.error('Error in executeQuantumMove:', error);
       setUserError('ERROR_MOVE_FAILURE');
       setSelectedSquares([]);
     }
@@ -269,7 +270,7 @@ export const useGameState = () => {
 
     const squareData = board[square];
     if (squareData.state === SQUARE_STATES.CLASSICAL) {
-      console.log('Cannot select collapsed square!');
+      Logger.debug('Cannot select collapsed square!');
       return;
     }
 
@@ -297,7 +298,7 @@ export const useGameState = () => {
   * Choose a collapse option
   */
   const chooseCollapse = useCallback(async (option) => {
-    console.log('Collapsing with chosen option:', option);
+    Logger.info('Collapsing with chosen option:', option);
 
     setUserError(null);
 
@@ -310,7 +311,7 @@ export const useGameState = () => {
       }
 
       if (result && result.success) {
-        console.log('✓ Collapse successful:', result.collapse_results);
+        Logger.success('Collapse successful:', result.collapse_results);
 
         // Step 1: Update the board state immediately
         setApiGameState(result.game_state);
@@ -320,7 +321,7 @@ export const useGameState = () => {
 
         if (winnerResult && winnerResult.success) {
           if (winnerResult.winner) {
-            console.log(' Winner after collapse:', winnerResult.winner);
+            Logger.info('Winner after collapse:', winnerResult.winner);
 
             setGameState(prev => ({
               ...prev,
@@ -335,7 +336,7 @@ export const useGameState = () => {
           }
 
           if (winnerResult.is_draw) {
-            console.log(' Draw after collapse');
+            Logger.info('Draw after collapse');
 
             setGameState(prev => ({
               ...prev,
@@ -372,7 +373,7 @@ export const useGameState = () => {
         setUserError(result.error || 'ERROR_COLLAPSE_FAILURE');
       }
     } catch (error) {
-      console.error(' Error in chooseCollapse:', error);
+      Logger.error('Error in chooseCollapse:', error);
       setUserError('ERROR_COLLAPSE_FAILURE');
     }
   }, [api, checkGameEnd]);
@@ -381,7 +382,7 @@ export const useGameState = () => {
    * Reset game
    */
   const resetGame = useCallback(async () => {
-    console.log('Resetting game...');
+    Logger.info('Resetting game...');
 
     setUserError(null);
 
@@ -394,7 +395,7 @@ export const useGameState = () => {
       }
 
       if (result && result.success) {
-        console.log('✓ Game reset');
+        Logger.success('Game reset');
         setApiGameState(result.game_state);
         setGameState(createGameState());
         setSelectedSquares([]);
@@ -402,7 +403,7 @@ export const useGameState = () => {
         setUserError(result.error || 'ERROR_RESET_FAILURE');
       }
     } catch (error) {
-      console.error('💥 Error in resetGame:', error);
+      Logger.error('Error in resetGame:', error);
       setUserError('ERROR_RESET_FAILURE');
     }
   }, [api]);
@@ -459,7 +460,7 @@ useEffect(() => {
         setApiGameState(result.game_state);
       }
     } catch (error) {
-      console.error('Failed to load initial game state:', error);
+      Logger.error('Failed to load initial game state:', error);
     }
   };
 

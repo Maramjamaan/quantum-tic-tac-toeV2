@@ -3,9 +3,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useGameState } from '../hooks/useGameState';
 import { SQUARE_STATES } from '../types/gameTypes';
 import './QuantumTicTacToe.css';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import Navbar from '../Navbar/Navbar';
+import Footer from '../Footer/Footer';
 import GuidePanel from './GuidePanel/GuidePanel';
+import Logger from '../utils/logger';
+
 
 // ✅ Square Component - Optimized with React.memo
 const Square = memo(({ 
@@ -31,7 +33,7 @@ const Square = memo(({
 
     // Don't allow selection of classical squares
     if (square.state === SQUARE_STATES.CLASSICAL) {
-      console.log('Cannot select classical square');
+      Logger.debug('Cannot select classical square');
       return;
     }
 
