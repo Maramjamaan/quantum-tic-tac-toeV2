@@ -99,7 +99,7 @@
     },
     
     "collapse": {
-      "title": "⚡ Quantum Collapse Moment!",
+      "title": "Quantum Collapse Moment!",
       "what": "What's Happening Now?",
       "whatDesc": "A cycle has formed in the entanglement network! This means a closed loop of entangled moves has been completed, and now all quantum states linked to this cycle must be 'measured' to collapse into definite classical positions.",
       "creator": "Player {{player}} completed the cycle with their last move",
@@ -116,11 +116,15 @@
       "chooserNote": "Note: The player opposite to whoever created the cycle always chooses how to collapse this adds deep strategic dimension to the game!"
     },
     
-    "victory": {
-      "title": " Well-Deserved Victory!",
-      "player": "Player {{player}} Achieves Victory!",
-      "explanation": "Three classical marks in a row! The quantum superposition states have finally collapsed to form a winning configuration. Excellent play and strategic thinking!"
-    },
+  "victory": {
+    "title": "Well-Deserved Victory!",
+    "player": "Player {{player}} Achieves Victory!",
+    "explanation": "Three classical marks in a row! The quantum superposition states have finally collapsed to form a winning configuration. Excellent play and strategic thinking!",
+    "simultaneous": "Simultaneous Win!",
+    "simultaneousDesc": "Both players got 3 in a row! The winner is determined by whose winning line contains the earliest move.",
+    "score": "{{player}}: {{score}} point",
+    "scoreHalf": "{{player}}: ½ point"
+  },
     
     "draw": {
       "title": " Quantum Draw!",

@@ -248,38 +248,24 @@ def collapse_moves(request: CollapseMoveRequest):
 
 @app.get("/game/winner")
 def check_winner():
-    """
-    Check if there's a winner or a draw
-    Returns:
-        - winner: 'X', 'O', or None
-        - is_draw: True/False
-        - game_over: True if game ended
-        - board: Current board state
-        - winning_line: Indices of winning squares [0-8] if winner exists
-    """
+    
+    # Check if there's a winner or a draw
+    # Now supports simultaneous wins with scoring!
+    
     try:
         game = get_game()
-        winner = game.check_winner()
+        
+
+        win_details = game.get_win_details()
         is_draw = game.check_for_draw()
         
-        # Find the winning line if there's a winner
-        winning_line = []
-        if winner:
-            winning_combinations = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
-                [0, 4, 8], [2, 4, 6]               # Diagonals
-            ]
-            
-            board = game.game_state.board
-            
-            for combo in winning_combinations:
-                if (board[combo[0]] == board[combo[1]] == board[combo[2]] == winner):
-                    winning_line = combo
-                    logger.info(f"🏆 Winning line found: {combo} for player {winner}")
-                    break
+        winner = win_details['winner']
         
-        logger.info(f"Check winner result: winner={winner}, draw={is_draw}, line={winning_line}")
+        logger.info(f"Check winner: winner={winner}, draw={is_draw}")
+        logger.info(f"Scores: X={win_details['x_score']}, O={win_details['o_score']}")
+        
+        if win_details['is_simultaneous']:
+            logger.info(" SIMULTANEOUS WIN DETECTED!")
         
         return {
             "success": True,
@@ -287,7 +273,13 @@ def check_winner():
             "is_draw": is_draw,
             "game_over": winner is not None or is_draw,
             "board": game.game_state.board,
-            "winning_line": winning_line
+            "winning_line": win_details.get('winning_line', []),
+           
+            "is_simultaneous": win_details['is_simultaneous'],
+            "x_score": win_details['x_score'],
+            "o_score": win_details['o_score'],
+            "x_wins_count": len(win_details['x_wins']),
+            "o_wins_count": len(win_details['o_wins'])
         }
         
     except Exception as e:

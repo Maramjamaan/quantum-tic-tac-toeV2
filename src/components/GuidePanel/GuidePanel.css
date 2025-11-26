@@ -525,3 +525,62 @@ html[lang="ar"] .assignment {
 html[lang="ar"] .arrow {
   transform: scaleX(-1);
 }
+/* ============================================
+   SIMULTANEOUS WIN STYLES
+   ============================================ */
+
+.simultaneous-scores {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.15));
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.simultaneous-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.simultaneous-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.scores-display {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 0.75rem;
+}
+
+.score-item {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.score-item.winner {
+  background: rgba(6, 255, 165, 0.2);
+  border: 1px solid var(--quantum-glow);
+  color: var(--quantum-glow);
+  text-shadow: 0 0 8px rgba(6, 255, 165, 0.5);
+}
+
+.score-item.loser {
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid var(--quantum-purple);
+  color: var(--quantum-purple);
+}
+
+/* RTL Support */
+html[lang="ar"] .scores-display {
+  flex-direction: row-reverse;
+}

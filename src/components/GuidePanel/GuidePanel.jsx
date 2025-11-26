@@ -33,32 +33,56 @@ const GuidePanel = ({
   // Smart Guide Content based on phase
   const renderSmartGuide = () => {
     switch (phase) {
-      case 'gameOver':
-        if (winner) {
-          return (
-            <div className="guide-card victory">
-              
-              <h3 className="guide-title">{t('guide.victory.title')}</h3>
-              <p className="guide-winner">
-                {t('guide.victory.player', { player: winner })}
-              </p>
-              <p className="guide-explanation">
-                {t('guide.victory.explanation')}
-              </p>
+    case 'gameOver':
+  if (winner) {
+    const isSimultaneous = apiGameState?.is_simultaneous;
+    const xScore = apiGameState?.x_score || 0;
+    const oScore = apiGameState?.o_score || 0;
+    
+    return (
+      <div className="guide-card victory">
+        <h3 className="guide-title">{t('guide.victory.title')}</h3>
+        <p className="guide-winner">
+          {t('guide.victory.player', { player: winner })}
+        </p>
+        
+        {isSimultaneous && (
+          <div className="simultaneous-scores">
+            <p className="simultaneous-title">{t('guide.victory.simultaneous')}</p>
+            <p className="simultaneous-desc">{t('guide.victory.simultaneousDesc')}</p>
+            <div className="scores-display">
+              <span className={`score-item ${xScore === 1 ? 'winner' : 'loser'}`}>
+                {xScore === 1 
+                  ? t('guide.victory.score', { player: 'X', score: '1' })
+                  : t('guide.victory.scoreHalf', { player: 'X' })
+                }
+              </span>
+              <span className={`score-item ${oScore === 1 ? 'winner' : 'loser'}`}>
+                {oScore === 1 
+                  ? t('guide.victory.score', { player: 'O', score: '1' })
+                  : t('guide.victory.scoreHalf', { player: 'O' })
+                }
+              </span>
             </div>
-          );
-        } else {
-          return (
-            <div className="guide-card draw">
-              
-              <h3 className="guide-title">{t('guide.draw.title')}</h3>
-              <p className="guide-explanation">
-                {t('guide.draw.explanation')}
-              </p>
-            </div>
-          );
-        }
-
+          </div>
+        )}
+        
+        <p className="guide-explanation">
+          {t('guide.victory.explanation')}
+        </p>
+      </div>
+    );
+  } else {
+    // Draw case
+    return (
+      <div className="guide-card draw">
+        <h3 className="guide-title">{t('guide.draw.title')}</h3>
+        <p className="guide-explanation">
+          {t('guide.draw.explanation')}
+        </p>
+      </div>
+    );
+  }
       case 'collapse':
         const cycleCreator = gameState.cycleCreator;
         const choosingPlayer = gameState.collapseChooser || currentPlayer;

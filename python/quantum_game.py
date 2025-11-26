@@ -196,10 +196,12 @@ class QuantumTicTacToe:
         new_entanglements = self._detect_entanglements(move)
         self.game_state.entanglements.extend(new_entanglements)
         
-        # STEP 5: Check if a cycle formed
-        # A cycle is when entanglements form a closed loop (A→B→C→A)
-        # ← MODIFIED: Now returns tuple (bool, List[str])
-        cycle_detected, cycle_move_ids = self._check_for_cycles()
+        # STEP 5: Check if ANY cycle formed
+        all_cycles = self._find_all_separate_cycles()
+        cycle_detected = len(all_cycles) > 0
+
+        # اختار أول دورة للانهيار (FIFO - First In First Out)
+        cycle_move_ids = all_cycles[0] if all_cycles else []
         
        
         # STEP 6: If cycle detected, generate collapse options
@@ -285,16 +287,19 @@ class QuantumTicTacToe:
         }
     
     # COLLAPSE WITH PLAYER CHOICE 
+   
     def collapse_with_choice(self, collapse_option: Dict[str, int]) -> Dict[str, Any]:
-        #This function is used in the game 
+        
         #Collapse quantum moves to CHOSEN positions (not random!)
         #This is used when the player selects a collapse option.
         #We don't run quantum circuits - we use the player's choice!
-        
+        # Also collapses stems automatically
         
         collapse_results = {}
         
-        # For each move in the chosen option
+        # collapse the chosen moves first (cycle moves)
+        cycle_moves = list(collapse_option.keys())
+        
         for move_id, chosen_square in collapse_option.items():
             move = self._find_move(move_id)
             
@@ -318,50 +323,37 @@ class QuantumTicTacToe:
                 
                 logger.info(f"Move {move_id} collapsed to chosen square {final_square}")
         
+        # Now handle stems automatically
+        stems = self._identify_stems(cycle_moves)
+        
+        for stem_move_id, forced_square in stems.items():
+            move = self._find_move(stem_move_id)
+            
+            if move and not move.collapsed:
+                # check if forced_square is already taken
+                if self.game_state.board[forced_square] is not None:
+                    # If taken, the other square must be free (by definition of stem)
+                    other_square = move.squares[0] if move.squares[1] == forced_square else move.squares[1]
+                    if self.game_state.board[other_square] is None:
+                        forced_square = other_square
+                    else:
+                        logger.error(f"Stem {stem_move_id} has no available squares!")
+                        continue
+                
+                # Collapse the stem move to its forced square
+                move.collapsed = True
+                move.final_square = forced_square
+                self.game_state.board[forced_square] = move.player
+                
+                collapse_results[stem_move_id] = forced_square
+                
+                logger.info(f"Stem {stem_move_id} auto-collapsed to square {forced_square}")
+        
         return {
             'success': True,
             'collapse_results': collapse_results,
             'game_state': self.game_state.to_dict()
         }
-  
-
-    # QUANTUM MEASUREMENT
-    def _measure_quantum_move(self, move: QuantumMove) -> int:
-       
-        #We run the quantum circuit and measure the result.
-        #The measurement collapses the superposition to either 0 or 1. 
-        #ReturnsThe square index where the move collapsed (0-8)
-        
-        try:
-            # Prepare the circuit for the quantum backend
-            #make it compatible with the simulator
-            transpiled = transpile(move.circuit, self.backend)
-            
-            # Run it, Execute the quantum circuit once
-            # only one shot needed to get a single measurement
-            job = self.backend.run(transpiled, shots=1)  # shots=1 means run once
-            result = job.result()
-            counts = result.get_counts()  # Get the measurement result
-
-
-            #extract the measured bit
-            # The result is either '0' or '1' (as a string)
-            measured_bit = int(list(counts.keys())[0])
-            
-            # Map the bit to actual square:
-            # 0 = first square in the list
-            # 1 = second square in the list
-            final_square = move.squares[measured_bit]
-            
-            logger.info(f"Quantum measurement: bit={measured_bit}, square={final_square}")
-            
-            return final_square
-            
-        except Exception as e:
-            # If quantum fails for some reason, use random as backup
-            logger.error(f"Quantum measurement failed: {e}")
-            import random
-            return random.choice(move.squares)
     
     
 
@@ -491,6 +483,130 @@ class QuantumTicTacToe:
         return (False, [])
     
     
+    def _find_all_separate_cycles(self) -> List[List[str]]:
+        """
+        كشف جميع الدورات المنفصلة على اللوحة
+        
+        Returns:
+            List of cycles, each cycle is a List[str] of move_ids
+            مثال: [['X1','X2','X3'], ['O1','O2']]
+        """
+        # بناء الغراف
+        graph = {}
+        
+        for ent in self.game_state.entanglements:
+            move1 = self._find_move(ent.move1_id)
+            move2 = self._find_move(ent.move2_id)
+            if (move1 and move1.collapsed) or (move2 and move2.collapsed):
+                continue
+            
+            if ent.move1_id not in graph:
+                graph[ent.move1_id] = set()
+            if ent.move2_id not in graph:
+                graph[ent.move2_id] = set()
+            
+            graph[ent.move1_id].add(ent.move2_id)
+            graph[ent.move2_id].add(ent.move1_id)
+        
+        if not graph:
+            return []
+        
+        # كشف المجموعات المنفصلة (Connected Components)
+        visited_global = set()
+        all_cycles = []
+        
+        # لكل مجموعة منفصلة
+        for start_node in graph:
+            if start_node in visited_global:
+                continue
+            
+            # ابحث عن دورة في هذه المجموعة
+            visited_local = set()
+            
+            def find_cycle_dfs(node: str, parent: str, path: List[str]) -> List[str]:
+                visited_local.add(node)
+                visited_global.add(node)
+                path.append(node)
+                
+                for neighbor in graph.get(node, set()):
+                    if neighbor == parent:
+                        continue
+                    
+                    if neighbor in path:
+                        cycle_start_idx = path.index(neighbor)
+                        return path[cycle_start_idx:]
+                    
+                    if neighbor not in visited_local:
+                        result = find_cycle_dfs(neighbor, node, path)
+                        if result:
+                            return result
+                
+                path.pop()
+                return []
+            
+            cycle = find_cycle_dfs(start_node, "", [])
+            if cycle:
+                all_cycles.append(cycle)
+                logger.info(f"Found separate cycle: {cycle}")
+        
+        return all_cycles
+    def _identify_stems(self, cycle_moves: List[str]) -> Dict[str, int]:
+        """
+        تحدد الحركات المتشابكة مع الدورة (stems) وترجع المربع الوحيد لانهيارها
+        
+        Stem = حركة متشابكة مع الدورة لكن ليست جزءاً منها
+        حسب ورقة Allan Goff: "Stems have only one possible collapse state"
+        
+        Args:
+            cycle_moves: قائمة بـ move_ids الموجودة في الدورة
+        
+        Returns:
+            Dict {move_id: forced_square} للحركات التي يجب أن تنهار تلقائياً
+        """
+        stems = {}
+        
+        # الخطوة 1: حدد المربعات التي ستستخدمها الدورة
+        cycle_squares = set()
+        for move_id in cycle_moves:
+            move = self._find_move(move_id)
+            if move:
+                cycle_squares.update(move.squares)
+        
+        logger.info(f"Cycle moves: {cycle_moves}")
+        logger.info(f"Cycle squares: {cycle_squares}")
+        
+        # الخطوة 2: ابحث عن الحركات المتشابكة مع الدورة لكن ليست فيها
+        for move in self.game_state.moves:
+            # تخطي الحركات المنهارة أو الموجودة في الدورة
+            if move.collapsed or move.move_id in cycle_moves:
+                continue
+            
+            # شوف إذا هذه الحركة متشابكة مع أي حركة في الدورة
+            move_squares = set(move.squares)
+            shared_with_cycle = move_squares & cycle_squares
+            
+            if shared_with_cycle:
+                # هذه الحركة stem! متشابكة مع الدورة
+                # المربع الوحيد المتاح = المربع اللي مو مشترك مع الدورة
+                available_squares = move_squares - cycle_squares
+                
+                if len(available_squares) == 1:
+                    # حالة مثالية: مربع واحد فقط متاح
+                    forced_square = list(available_squares)[0]
+                    stems[move.move_id] = forced_square
+                    logger.info(f"Stem found: {move.move_id} must collapse to {forced_square}")
+                
+                elif len(available_squares) == 0:
+                    # كلا المربعين مشتركين مع الدورة!
+                    # هذه حالة معقدة - الـ stem سينهار حسب اختيار الدورة
+                    logger.info(f"Complex stem: {move.move_id} has both squares in cycle")
+                    # لا نضيفها للـ stems لأن انهيارها يعتمد على اختيار الدورة
+                
+                else:
+                    # مربعين متاحين - مو stem حقيقي
+                    logger.info(f"Not a stem: {move.move_id} has {len(available_squares)} available squares")
+        
+        return stems
     # ====================================
     # VALIDATION HELPERS
     # ====================================
@@ -670,10 +786,29 @@ class QuantumTicTacToe:
     def check_winner(self) -> Optional[str]:
         
         # Check if there's a winner.
-        # Only CLASSICAL moves count! Quantum moves don't count for winning.
+        # Uses simultaneous win detection for proper scoring.
         
+        result = self._check_simultaneous_wins()
         
-        # All possible winning combinations
+    #    Store last win result for detailed retrieval
+        self._last_win_result = result
+        
+        return result['winner']
+
+
+    def get_win_details(self) -> Dict[str, Any]:
+        # Get detailed win information from last check
+
+        if hasattr(self, '_last_win_result'):
+            return self._last_win_result
+        return self._check_simultaneous_wins()
+    
+    def _check_simultaneous_wins(self) -> Dict[str, Any]:
+        
+       #check for simultaneous wins after collapse. 
+       # rule : if both players have winning lines, the player with the oldest winning move takes a 1 whole point and the other player gets 0.5 point.
+        
+        #Returns: Dict with details about simultaneous wins
         winning_combinations = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
             [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
@@ -682,14 +817,97 @@ class QuantumTicTacToe:
         
         board = self.game_state.board
         
-        # Check each winning combination
-        for combo in winning_combinations:
-            # If all 3 squares have the same player and are not empty
-            if (board[combo[0]] == board[combo[1]] == board[combo[2]] 
-                and board[combo[0]] is not None):
-                return board[combo[0]]  # Return the winning player
+        # search for winning lines for both players
+        x_wins = []  
+        o_wins = []  
         
-        return None  # No winner yet
+        for combo in winning_combinations:
+            squares = [board[i] for i in combo]
+            
+            #check if all three squares are the same player
+            if squares[0] == squares[1] == squares[2] and squares[0] is not None:
+                player = squares[0]
+                
+                # search for the oldest collapsed move in this winning line
+                oldest_move_num = float('inf')
+                for sq_index in combo:
+                    # search through moves to find which one collapsed to this square
+                    for move in self.game_state.moves:
+                        if move.collapsed and move.final_square == sq_index:
+                            move_num = int(move.move_id[1:])
+                            oldest_move_num = min(oldest_move_num, move_num)
+                            break
+                
+                win_info = {
+                    'combo': combo,
+                    'oldest_move': oldest_move_num
+                }
+                
+                if player == 'X':
+                    x_wins.append(win_info)
+                else:
+                    o_wins.append(win_info)
+        
+        #  result analysis
+        result = {
+            'x_wins': x_wins,
+            'o_wins': o_wins,
+            'x_score': 0,
+            'o_score': 0,
+            'winner': None,
+            'is_simultaneous': False
+        }
+        
+        #  No wins
+        if not x_wins and not o_wins:
+            return result
+        
+        #  only X won
+        if x_wins and not o_wins:
+            result['winner'] = 'X'
+            result['x_score'] = 1
+            result['winning_line'] = x_wins[0]['combo']
+            return result
+        
+        # only O won
+        if o_wins and not x_wins:
+            result['winner'] = 'O'
+            result['o_score'] = 1
+            result['winning_line'] = o_wins[0]['combo']
+            return result
+        
+        #  Both players won - simultaneous win!
+        result['is_simultaneous'] = True
+        
+        # Find oldest winning move for each player
+        x_oldest = min(win['oldest_move'] for win in x_wins)
+        o_oldest = min(win['oldest_move'] for win in o_wins)
+        
+        logger.info(f"Simultaneous win detected!")
+        logger.info(f"X oldest winning move: X{x_oldest}")
+        logger.info(f"O oldest winning move: O{o_oldest}")
+        
+        # Determine winner based on oldest winning move
+        if x_oldest < o_oldest:
+            result['winner'] = 'X'
+            result['x_score'] = 1
+            result['o_score'] = 0.5
+            result['winning_line'] = x_wins[0]['combo']
+            logger.info(f"X wins with 1 point (X{x_oldest} < O{o_oldest})")
+        elif o_oldest < x_oldest:
+            result['winner'] = 'O'
+            result['o_score'] = 1
+            result['x_score'] = 0.5
+            result['winning_line'] = o_wins[0]['combo']
+            logger.info(f"O wins with 1 point (O{o_oldest} < X{x_oldest})")
+        else:
+            # impossible tie scenario, but default to X winning
+            result['winner'] = 'X'  # X wins ties by default when oldest moves are equal
+            result['x_score'] = 1
+            result['o_score'] = 0.5 
+            result['winning_line'] = x_wins[0]['combo']
+        
+        return result
     
     def check_for_draw(self) -> bool:
         # Check if game is a draw.
