@@ -1,6 +1,8 @@
 """
 FastAPI Backend for Quantum Tic-Tac-Toe
 Connects React frontend to quantum game engine
+
+✅ UPDATED: Now returns x_winning_line and o_winning_line for simultaneous wins
 """
 
 from fastapi import FastAPI, HTTPException
@@ -248,14 +250,15 @@ def collapse_moves(request: CollapseMoveRequest):
 
 @app.get("/game/winner")
 def check_winner():
+    """
+    Check if there's a winner or a draw
+    Now supports simultaneous wins with scoring!
     
-    # Check if there's a winner or a draw
-    # Now supports simultaneous wins with scoring!
-    
+    ✅ UPDATED: Returns x_winning_line and o_winning_line for UI display
+    """
     try:
         game = get_game()
         
-
         win_details = game.get_win_details()
         is_draw = game.check_for_draw()
         
@@ -265,7 +268,9 @@ def check_winner():
         logger.info(f"Scores: X={win_details['x_score']}, O={win_details['o_score']}")
         
         if win_details['is_simultaneous']:
-            logger.info(" SIMULTANEOUS WIN DETECTED!")
+            logger.info("⚡ SIMULTANEOUS WIN DETECTED!")
+            logger.info(f"X winning line: {win_details.get('x_winning_line')}")
+            logger.info(f"O winning line: {win_details.get('o_winning_line')}")
         
         return {
             "success": True,
@@ -274,12 +279,17 @@ def check_winner():
             "game_over": winner is not None or is_draw,
             "board": game.game_state.board,
             "winning_line": win_details.get('winning_line', []),
-           
+            
+            # ✅ NEW: Both winning lines for simultaneous win display
+            "x_winning_line": win_details.get('x_winning_line'),
+            "o_winning_line": win_details.get('o_winning_line'),
+            
+            # Simultaneous win info
             "is_simultaneous": win_details['is_simultaneous'],
             "x_score": win_details['x_score'],
             "o_score": win_details['o_score'],
-            "x_wins_count": len(win_details['x_wins']),
-            "o_wins_count": len(win_details['o_wins'])
+            "x_wins_count": win_details.get('x_wins_count', len(win_details['x_wins'])),
+            "o_wins_count": win_details.get('o_wins_count', len(win_details['o_wins']))
         }
         
     except Exception as e:
@@ -328,7 +338,7 @@ if __name__ == "__main__":
     print("=" * 50)
     print(" Server: http://localhost:8000")
     print(" API Docs: http://localhost:8000/docs")
-    print("Ready to play!\n")
+    print(" Ready to play!\n")
     
     uvicorn.run(
         app, 

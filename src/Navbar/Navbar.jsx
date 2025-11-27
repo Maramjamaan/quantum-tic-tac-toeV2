@@ -64,7 +64,7 @@ const Navbar = () => {
             </button>
             {expandedSection === 'about' && (
               <div className="section-content">
-                <p>{t('navbar.about.description')}</p>
+                
                 <ul>
                   <li>
                     <strong>{t('navbar.about.superposition')}</strong>

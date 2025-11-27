@@ -855,29 +855,48 @@ class QuantumTicTacToe:
             'x_score': 0,
             'o_score': 0,
             'winner': None,
-            'is_simultaneous': False
+            'is_simultaneous': False,
+            'x_winning_line': None,
+            'o_winning_line': None,
+            'winning_line': None,
+            'x_wins_count': 0,
+            'o_wins_count': 0
         }
         
         #  No wins
         if not x_wins and not o_wins:
             return result
         
-        #  only X won
+        #  Only X won
         if x_wins and not o_wins:
             result['winner'] = 'X'
             result['x_score'] = 1
             result['winning_line'] = x_wins[0]['combo']
+            result['x_winning_line'] = x_wins[0]['combo']
+            result['o_winning_line'] = None
+            result['x_wins_count'] = len(x_wins)
+            result['o_wins_count'] = 0
             return result
         
-        # only O won
+        # Only O won
         if o_wins and not x_wins:
             result['winner'] = 'O'
             result['o_score'] = 1
             result['winning_line'] = o_wins[0]['combo']
+            result['x_winning_line'] = None
+            result['o_winning_line'] = o_wins[0]['combo']
+            result['x_wins_count'] = 0
+            result['o_wins_count'] = len(o_wins)
             return result
         
         #  Both players won - simultaneous win!
         result['is_simultaneous'] = True
+        result['x_wins_count'] = len(x_wins)
+        result['o_wins_count'] = len(o_wins)
+        
+        # Store BOTH winning lines for UI display
+        result['x_winning_line'] = x_wins[0]['combo']
+        result['o_winning_line'] = o_wins[0]['combo']
         
         # Find oldest winning move for each player
         x_oldest = min(win['oldest_move'] for win in x_wins)
@@ -886,6 +905,8 @@ class QuantumTicTacToe:
         logger.info(f"Simultaneous win detected!")
         logger.info(f"X oldest winning move: X{x_oldest}")
         logger.info(f"O oldest winning move: O{o_oldest}")
+        logger.info(f"X winning line: {result['x_winning_line']}")
+        logger.info(f"O winning line: {result['o_winning_line']}")
         
         # Determine winner based on oldest winning move
         if x_oldest < o_oldest:
@@ -902,7 +923,7 @@ class QuantumTicTacToe:
             logger.info(f"O wins with 1 point (O{o_oldest} < X{x_oldest})")
         else:
             # impossible tie scenario, but default to X winning
-            result['winner'] = 'X'  # X wins ties by default when oldest moves are equal
+            result['winner'] = 'X'
             result['x_score'] = 1
             result['o_score'] = 0.5 
             result['winning_line'] = x_wins[0]['combo']

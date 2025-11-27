@@ -2,6 +2,8 @@
  * useGameState Hook - Main Game Logic
  * ====================================
  * This hook manages the entire game state and connects to the Python API.
+ * 
+ * ✅ UPDATED: Added xWinningLine and oWinningLine for simultaneous win display
  */
 import { MIN_SQUARES_FOR_MOVE, COLLAPSE_DELAY } from '../constants/gameConstants';
 import { useState, useCallback, useEffect } from 'react';
@@ -121,19 +123,39 @@ export const useGameState = () => {
     const result = await api.checkWinner();
 
     if (result && result.success) {
+      Logger.info('Winner check result:', result);
+      
       if (result.winner) {
-        Logger.info('Winner detected:', result.winner);
+        Logger.info('🏆 Winner detected:', result.winner);
         Logger.info('Winning line:', result.winning_line);
+        Logger.info('Is simultaneous:', result.is_simultaneous);
+        Logger.info('X winning line:', result.x_winning_line);
+        Logger.info('O winning line:', result.o_winning_line);
 
         setGameState(prev => ({
           ...prev,
           status: result.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
           winner: result.winner,
-          winningLine: result.winning_line || []
+          winningLine: result.winning_line || [],
+          xWinningLine: result.x_winning_line || [],  // ✅ NEW
+          oWinningLine: result.o_winning_line || []   // ✅ NEW
         }));
+        
+        // Update apiGameState with winner info
+        setApiGameState(prev => ({
+          ...prev,
+          winner: result.winner,
+          is_simultaneous: result.is_simultaneous,
+          x_score: result.x_score,
+          o_score: result.o_score,
+          winning_line: result.winning_line,
+          x_winning_line: result.x_winning_line,  // ✅ NEW
+          o_winning_line: result.o_winning_line   // ✅ NEW
+        }));
+        
         return true;
       } else if (result.is_draw) {
-        Logger.info('Draw detected!');
+        Logger.info('🤝 Draw detected!');
 
         setGameState(prev => ({
           ...prev,
@@ -148,20 +170,27 @@ export const useGameState = () => {
   }, [api]);
 
   /**
-   * Check if game should end (all squares classical)
+   * Check if game should end (winner or board full)
    */
   const checkGameEnd = useCallback(async () => {
+    // Always check for winner first
+    const hasWinner = await checkWinner();
+    if (hasWinner) {
+      Logger.info('Game ended with winner/draw');
+      return true;
+    }
+
+    // Then check if board is full
     const emptyCount = board.filter(sq =>
       sq.state === SQUARE_STATES.EMPTY || sq.classicalMoveId === null
     ).length;
 
-    if ((emptyCount < MIN_SQUARES_FOR_MOVE)) {
-      Logger.warn(`Less than 2 empty squares (${emptyCount}) - checking game end`);
-
-      await checkWinner();
-
-      return true;
+    if (emptyCount < MIN_SQUARES_FOR_MOVE) {
+      Logger.warn(`Less than 2 empty squares (${emptyCount}) - game should end`);
+      const finalCheck = await checkWinner();
+      return finalCheck;
     }
+    
     return false;
   }, [board, checkWinner]);
 
@@ -206,7 +235,7 @@ export const useGameState = () => {
         setApiGameState(result.game_state);
 
         if (result.cycle_detected) {
-          Logger.info('Cycle detected!');
+          Logger.info('🌀 Cycle detected!');
           Logger.info('Cycle creator:', result.cycle_creator);
           Logger.info('Collapse chooser:', result.collapse_chooser);
 
@@ -242,6 +271,7 @@ export const useGameState = () => {
             currentPlayer: result.game_state.current_player
           }));
 
+          // Check for game end after every move
           setTimeout(async () => {
             await checkGameEnd();
           }, COLLAPSE_DELAY);
@@ -250,7 +280,7 @@ export const useGameState = () => {
         setSelectedSquares([]);
 
       } else {
-        Logger.error('Move failed');
+        Logger.error('Move failed:', result.error);
         setUserError(result.error || 'ERROR_MOVE_FAILURE');
         setSelectedSquares([]);
       }
@@ -311,32 +341,54 @@ export const useGameState = () => {
       }
 
       if (result && result.success) {
-        Logger.success('Collapse successful:', result.collapse_results);
+        Logger.success('✅ Collapse successful:', result.collapse_results);
 
         // Step 1: Update the board state immediately
         setApiGameState(result.game_state);
 
-        // Step 2: Check for winner BEFORE changing game state
+        // Step 2: Check for winner IMMEDIATELY after collapse
         const winnerResult = await api.checkWinner();
+        Logger.info('Winner check after collapse:', winnerResult);
 
         if (winnerResult && winnerResult.success) {
           if (winnerResult.winner) {
-            Logger.info('Winner after collapse:', winnerResult.winner);
+            Logger.info('🏆 Winner after collapse:', winnerResult.winner);
+            Logger.info('Is simultaneous:', winnerResult.is_simultaneous);
+            Logger.info('X score:', winnerResult.x_score);
+            Logger.info('O score:', winnerResult.o_score);
+            Logger.info('X winning line:', winnerResult.x_winning_line);
+            Logger.info('O winning line:', winnerResult.o_winning_line);
 
             setGameState(prev => ({
               ...prev,
               status: winnerResult.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
               winner: winnerResult.winner,
               winningLine: winnerResult.winning_line || [],
+              xWinningLine: winnerResult.x_winning_line || [],  // ✅ NEW
+              oWinningLine: winnerResult.o_winning_line || [],  // ✅ NEW
               collapseOptions: [],
               pendingCycle: null
+            }));
+
+            // Update apiGameState with ALL winner info for display
+            setApiGameState(prev => ({
+              ...prev,
+              winner: winnerResult.winner,
+              is_simultaneous: winnerResult.is_simultaneous,
+              x_score: winnerResult.x_score,
+              o_score: winnerResult.o_score,
+              winning_line: winnerResult.winning_line,
+              x_winning_line: winnerResult.x_winning_line,  // ✅ NEW
+              o_winning_line: winnerResult.o_winning_line,  // ✅ NEW
+              x_wins_count: winnerResult.x_wins_count,
+              o_wins_count: winnerResult.o_wins_count
             }));
 
             return; // Game ended, stop here
           }
 
           if (winnerResult.is_draw) {
-            Logger.info('Draw after collapse');
+            Logger.info('🤝 Draw after collapse');
 
             setGameState(prev => ({
               ...prev,
@@ -367,7 +419,7 @@ export const useGameState = () => {
         // Step 4: Check if game should end (board full)
         setTimeout(async () => {
           await checkGameEnd();
-        }, 500);
+        }, 300);
 
       } else {
         setUserError(result.error || 'ERROR_COLLAPSE_FAILURE');
@@ -446,31 +498,45 @@ export const useGameState = () => {
     }
   }, [gameState.status, board, executeQuantumMove]);
 
- // ==========================================
-// LOAD INITIAL STATE
-// ==========================================
+  // ==========================================
+  // LOAD INITIAL STATE
+  // ==========================================
 
-useEffect(() => {
-  let isMounted = true;
-  
-  const loadGameState = async () => {
-    try {
-      const result = await api.getGameState();
-      if (result && result.success && isMounted) {
-        setApiGameState(result.game_state);
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadGameState = async () => {
+      try {
+        const result = await api.getGameState();
+        if (result && result.success && isMounted) {
+          setApiGameState(result.game_state);
+          
+          // Check if there's already a winner on load
+          const winnerCheck = await api.checkWinner();
+          if (winnerCheck && winnerCheck.success && winnerCheck.winner) {
+            setGameState(prev => ({
+              ...prev,
+              status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
+              winner: winnerCheck.winner,
+              winningLine: winnerCheck.winning_line || [],
+              xWinningLine: winnerCheck.x_winning_line || [],  // ✅ NEW
+              oWinningLine: winnerCheck.o_winning_line || []   // ✅ NEW
+            }));
+          }
+        }
+      } catch (error) {
+        Logger.error('Failed to load initial game state:', error);
       }
-    } catch (error) {
-      Logger.error('Failed to load initial game state:', error);
-    }
-  };
+    };
 
-  loadGameState();
-  
-  return () => {
-    isMounted = false;
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []); // ✅ We only want this to run once on mount
+    loadGameState();
+    
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ==========================================
   // RETURN EVERYTHING
   // ==========================================
@@ -501,6 +567,8 @@ useEffect(() => {
     currentPlayer: apiGameState?.current_player || PLAYERS.X,
     winner: gameState.winner,
     winningLine: gameState.winningLine || [],
+    xWinningLine: gameState.xWinningLine || [],  // ✅ NEW
+    oWinningLine: gameState.oWinningLine || [],  // ✅ NEW
 
     // API status
     loading: api.loading,

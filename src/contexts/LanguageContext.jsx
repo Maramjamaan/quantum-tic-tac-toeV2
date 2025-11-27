@@ -4,15 +4,7 @@ import arTranslations from '../translations/ar.json';
 
 const LanguageContext = createContext();
 
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within LanguageProvider');
-  }
-  return context;
-};
-
-export const LanguageProvider = ({ children }) => {
+const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('en');
 
   const translations = {
@@ -62,3 +54,14 @@ export const LanguageProvider = ({ children }) => {
     </LanguageContext.Provider>
   );
 };
+
+const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within LanguageProvider');
+  }
+  return context;
+};
+
+// Export at the end to avoid circular dependency
+export { LanguageProvider, useLanguage };

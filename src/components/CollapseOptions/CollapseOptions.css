@@ -1,0 +1,209 @@
+/* ============================================
+   COLLAPSE OPTIONS - BELOW BOARD
+   ============================================ */
+
+.collapse-options-container {
+  background: linear-gradient(135deg, rgba(255, 0, 110, 0.1), rgba(237, 137, 54, 0.1));
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 2px solid var(--quantum-pink);
+  box-shadow: 0 0 30px rgba(255, 0, 110, 0.3);
+  animation: collapse-appear 0.4s ease-out;
+}
+
+@keyframes collapse-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.collapse-options-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.collapse-options-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--quantum-pink);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 15px rgba(255, 0, 110, 0.5);
+}
+
+.collapse-options-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Options Grid - Horizontal Layout */
+.collapse-options-grid {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Option Card */
+.collapse-option-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.25rem;
+  min-width: 200px;
+  max-width: 280px;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.collapse-option-card:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  background: rgba(0, 212, 255, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+}
+
+.option-header {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.option-number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--quantum-cyan);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+}
+
+/* Assignments */
+.option-assignments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.assignment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.move-badge,
+.square-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.move-badge {
+  background: rgba(0, 212, 255, 0.2);
+  color: var(--quantum-cyan);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+}
+
+.square-badge {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--quantum-purple);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.arrow {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+/* Choose Button */
+.choose-option-btn {
+  width: 100%;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(6, 255, 165, 0.2));
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.choose-option-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.35), rgba(6, 255, 165, 0.35));
+  border-color: rgba(0, 212, 255, 0.7);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Loading State */
+.collapse-waiting {
+  text-align: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border: 3px solid rgba(255, 0, 110, 0.2);
+  border-top-color: var(--quantum-pink);
+  border-radius: 50%;
+  animation: spinner-rotate 1s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.collapse-waiting p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* RTL Support */
+html[lang="ar"] .collapse-options-container {
+  direction: rtl;
+}
+
+html[lang="ar"] .assignment {
+  flex-direction: row-reverse;
+}
+
+html[lang="ar"] .arrow {
+  transform: scaleX(-1);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .collapse-options-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .collapse-option-card {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .collapse-options-container {
+    padding: 1.25rem;
+  }
+
+  .collapse-options-header h3 {
+    font-size: 1.2rem;
+  }
+}

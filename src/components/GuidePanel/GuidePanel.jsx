@@ -1,21 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './GuidePanel.css';
 
 const GuidePanel = ({
   gameState,
   apiGameState,
-  stats,
   isPlaying,
   isWaitingCollapse,
   isGameOver,
   winner,
-  resetGame,
-  chooseCollapse,
   selectedSquares = []
 }) => {
   const { t } = useLanguage();
-  const [showStats, setShowStats] = useState(false);
+
+  // 🔍 DEBUG: Log what we receive
+  console.log('=== GuidePanel Debug ===');
+  console.log('isGameOver:', isGameOver);
+  console.log('winner:', winner);
+  console.log('apiGameState:', apiGameState);
+  console.log('is_simultaneous:', apiGameState?.is_simultaneous);
+  console.log('x_score:', apiGameState?.x_score);
+  console.log('o_score:', apiGameState?.o_score);
+  console.log('========================');
 
   // Determine current game phase
   const getCurrentPhase = () => {
@@ -33,63 +39,89 @@ const GuidePanel = ({
   // Smart Guide Content based on phase
   const renderSmartGuide = () => {
     switch (phase) {
-    case 'gameOver':
-  if (winner) {
-    const isSimultaneous = apiGameState?.is_simultaneous;
-    const xScore = apiGameState?.x_score || 0;
-    const oScore = apiGameState?.o_score || 0;
-    
-    return (
-      <div className="guide-card victory">
-        <h3 className="guide-title">{t('guide.victory.title')}</h3>
-        <p className="guide-winner">
-          {t('guide.victory.player', { player: winner })}
-        </p>
-        
-        {isSimultaneous && (
-          <div className="simultaneous-scores">
-            <p className="simultaneous-title">{t('guide.victory.simultaneous')}</p>
-            <p className="simultaneous-desc">{t('guide.victory.simultaneousDesc')}</p>
-            <div className="scores-display">
-              <span className={`score-item ${xScore === 1 ? 'winner' : 'loser'}`}>
-                {xScore === 1 
-                  ? t('guide.victory.score', { player: 'X', score: '1' })
-                  : t('guide.victory.scoreHalf', { player: 'X' })
-                }
-              </span>
-              <span className={`score-item ${oScore === 1 ? 'winner' : 'loser'}`}>
-                {oScore === 1 
-                  ? t('guide.victory.score', { player: 'O', score: '1' })
-                  : t('guide.victory.scoreHalf', { player: 'O' })
-                }
-              </span>
+      case 'gameOver':
+        if (winner) {
+          // ✅ Check for simultaneous win from apiGameState
+          const isSimultaneous = apiGameState?.is_simultaneous === true;
+          const xScore = apiGameState?.x_score || 0;
+          const oScore = apiGameState?.o_score || 0;
+          
+          console.log('🎯 Rendering gameOver - isSimultaneous:', isSimultaneous);
+          
+          // ✅ SIMULTANEOUS WIN - Special Design
+          if (isSimultaneous) {
+            const loser = winner === 'X' ? 'O' : 'X';
+            
+            console.log('🎉 Rendering SIMULTANEOUS WIN card!');
+            
+            return (
+              <div className="guide-card simultaneous-win">
+                {/* Header */}
+                <div className="sim-header">
+                  <h3 className="sim-title">{t('guide.victory.simultaneous')}</h3>
+                </div>
+                
+                {/* Description */}
+                <p className="sim-description">
+                  {t('guide.victory.simultaneousDesc')}
+                </p>
+                
+                {/* Score Cards */}
+                <div className="sim-scores-container">
+                  {/* Winner Card */}
+                  <div className="sim-score-card winner-card">
+                    <span className="sim-medal">🥇</span>
+                    <span className="sim-player-name">{winner}</span>
+                    <span className="sim-points">1 {t('guide.victory.point')}</span>
+                  </div>
+                  
+                  {/* Runner-up Card */}
+                  <div className="sim-score-card runnerup-card">
+                    <span className="sim-medal">🥈</span>
+                    <span className="sim-player-name">{loser}</span>
+                    <span className="sim-points">½ {t('guide.victory.point')}</span>
+                  </div>
+                </div>
+                
+                {/* Explanation */}
+                <p className="sim-reason">
+                  {t('guide.victory.earliestMove', { player: winner })}
+                </p>
+              </div>
+            );
+          }
+          
+          // NORMAL WIN - Regular Design
+          console.log('📋 Rendering NORMAL WIN card');
+          return (
+            <div className="guide-card victory">
+              <h3 className="guide-title">{t('guide.victory.title')}</h3>
+              <p className="guide-winner">
+                {t('guide.victory.player', { player: winner })}
+              </p>
+              <p className="guide-explanation">
+                {t('guide.victory.explanation')}
+              </p>
             </div>
-          </div>
-        )}
-        
-        <p className="guide-explanation">
-          {t('guide.victory.explanation')}
-        </p>
-      </div>
-    );
-  } else {
-    // Draw case
-    return (
-      <div className="guide-card draw">
-        <h3 className="guide-title">{t('guide.draw.title')}</h3>
-        <p className="guide-explanation">
-          {t('guide.draw.explanation')}
-        </p>
-      </div>
-    );
-  }
+          );
+        } else {
+          // DRAW
+          return (
+            <div className="guide-card draw">
+              <h3 className="guide-title">{t('guide.draw.title')}</h3>
+              <p className="guide-explanation">
+                {t('guide.draw.explanation')}
+              </p>
+            </div>
+          );
+        }
+
       case 'collapse':
         const cycleCreator = gameState.cycleCreator;
         const choosingPlayer = gameState.collapseChooser || currentPlayer;
         
         return (
           <div className="guide-card collapse-phase">
-            
             <h3 className="guide-title">{t('guide.collapse.title')}</h3>
             
             <div className="guide-context">
@@ -114,9 +146,15 @@ const GuidePanel = ({
 
             <div className="guide-why">
               <p>
-                <strong> {t('guide.collapse.why')}</strong>
+                <strong>{t('guide.collapse.why')}</strong>
                 {t('guide.collapse.whyDesc')}
               </p>
+            </div>
+
+            {/* Arrow pointing down to collapse options */}
+            <div className="collapse-arrow-hint">
+              <span className="arrow-down">↓</span>
+              <span className="hint-text">{t('guide.collapse.optionsBelow') || 'Choose from options below'}</span>
             </div>
           </div>
         );
@@ -124,7 +162,6 @@ const GuidePanel = ({
       case 'secondSquare':
         return (
           <div className="guide-card second-square">
-           
             <h3 className="guide-title">
               {t('guide.secondSquare.title', { player: currentPlayer })}
             </h3>
@@ -155,7 +192,7 @@ const GuidePanel = ({
 
             <div className="guide-tip">
               <p>
-                <strong> {t('guide.tip')}</strong>
+                <strong>{t('guide.tip')}</strong>
                 {t('guide.secondSquare.tip')}
               </p>
             </div>
@@ -168,7 +205,6 @@ const GuidePanel = ({
         
         return (
           <div className="guide-card first-square">
-            
             <h3 className="guide-title">
               {t('guide.firstSquare.title', { player: currentPlayer })}
             </h3>
@@ -187,66 +223,20 @@ const GuidePanel = ({
 
             <div className="guide-why">
               <p>
-                <strong> {t('guide.firstSquare.why')}</strong>
+                <strong>{t('guide.firstSquare.why')}</strong>
                 {t('guide.firstSquare.whyDesc', { moveId })}
               </p>
             </div>
 
             <div className="guide-next">
               <p>
-                <strong> {t('guide.next')}</strong>
+                <strong>{t('guide.next')}</strong>
                 {t('guide.firstSquare.next')}
               </p>
             </div>
           </div>
         );
     }
-  };
-
-  // Render collapse options
-  const renderCollapseOptions = () => {
-    const options = gameState.collapseOptions || apiGameState?.collapseOptions || [];
-
-    if (!isWaitingCollapse || options.length === 0) {
-      return (
-        <div className="collapse-waiting">
-          <div className="loading-spinner"></div>
-          <p>{t('guide.collapse.generating')}</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="collapse-options-section">
-        <h4 className="options-title">{t('guide.collapse.optionsTitle')}</h4>
-        <p className="options-description">{t('guide.collapse.optionsDesc')}</p>
-        
-        <div className="collapse-options">
-          {options.map((option, index) => (
-            <div key={index} className="collapse-option">
-              <div className="option-header">
-                <span className="option-number">{t('guide.collapse.option', { number: index + 1 })}</span>
-              </div>
-              <div className="option-assignments">
-                {Object.entries(option).map(([moveId, square]) => (
-                  <div key={moveId} className="assignment">
-                    <span className="move-badge">{moveId}</span>
-                    <span className="arrow">→</span>
-                    <span className="square-badge">{t('guide.collapse.square', { number: square + 1 })}</span>
-                  </div>
-                ))}
-              </div>
-              <button 
-                className="choose-option-btn" 
-                onClick={() => chooseCollapse(option)}
-              >
-                ✓ {t('guide.collapse.chooseThis')}
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -260,58 +250,6 @@ const GuidePanel = ({
       <section className="smart-guide-section">
         {renderSmartGuide()}
       </section>
-
-      {/* Collapse Options (only when collapsing) */}
-      {isWaitingCollapse && (
-        <section className="collapse-section">
-          {renderCollapseOptions()}
-        </section>
-      )}
-
-      {/* Game Controls */}
-      <section className="controls-section">
-        <h4>{t('guide.controls.title')}</h4>
-        <div className="controls-grid">
-          <button className="control-btn reset-btn" onClick={resetGame}>
-            {t('guide.controls.reset')}
-          </button>
-
-          <button
-            className="control-btn stats-btn"
-            onClick={() => setShowStats(!showStats)}
-          >
-            {showStats ? t('guide.controls.hideStats') : t('guide.controls.showStats')}
-          </button>
-        </div>
-      </section>
-
-      {/* Statistics (collapsible) */}
-      {showStats && (
-        <section className="stats-section">
-          <h4>{t('guide.stats.title')}</h4>
-          <div className="stats-grid">
-            <div className="stat-item">
-              
-              <span className="stat-label">{t('guide.stats.totalMoves')}</span>
-              <span className="stat-value">{stats.totalMoves}</span>
-            </div>
-            <div className="stat-item">
-              
-              <span className="stat-label">{t('guide.stats.quantumMoves')}</span>
-              <span className="stat-value">{stats.quantumMoves}</span>
-            </div>
-            <div className="stat-item">
-              
-              <span className="stat-label">{t('guide.stats.classicalMoves')}</span>
-              <span className="stat-value">{stats.classicalMoves}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">{t('guide.stats.entanglements')}</span>
-              <span className="stat-value">{stats.entanglements}</span>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 };

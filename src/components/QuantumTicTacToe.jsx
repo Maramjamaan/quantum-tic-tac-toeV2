@@ -6,22 +6,37 @@ import './QuantumTicTacToe.css';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import GuidePanel from './GuidePanel/GuidePanel';
+import ControlPanel from './ControlPanel/ControlPanel';
 import Logger from '../utils/logger';
 
 
-// ✅ Square Component - Optimized with React.memo
+// ✅ Square Component - UPDATED with dual winning lines
 const Square = memo(({ 
   index, 
   square, 
   isSelected, 
-  isWinning, 
+  isWinning,
+  isXWinning,    // ✅ NEW: Is this square in X's winning line?
+  isOWinning,    // ✅ NEW: Is this square in O's winning line?
   isPlaying, 
   onSquareClick 
 }) => {
   const getSquareClass = () => {
     let classes = ['square'];
     if (isSelected) classes.push('selected');
-    if (isWinning) classes.push('winning');
+    
+    // ✅ UPDATED: Different classes for X and O winning lines
+    if (isXWinning && isOWinning) {
+      // Square is in BOTH winning lines (rare but possible)
+      classes.push('winning', 'winning-both');
+    } else if (isXWinning) {
+      classes.push('winning', 'winning-x');
+    } else if (isOWinning) {
+      classes.push('winning', 'winning-o');
+    } else if (isWinning) {
+      classes.push('winning');
+    }
+    
     if (square.state === SQUARE_STATES.CLASSICAL) classes.push('classical');
     if (square.state === SQUARE_STATES.QUANTUM) classes.push('quantum');
     if (square.state === SQUARE_STATES.EMPTY) classes.push('empty');
@@ -31,7 +46,6 @@ const Square = memo(({
   const handleClick = () => {
     if (!isPlaying) return;
 
-    // Don't allow selection of classical squares
     if (square.state === SQUARE_STATES.CLASSICAL) {
       Logger.debug('Cannot select classical square');
       return;
@@ -73,69 +87,139 @@ const Square = memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  // ✅ Custom comparison - only re-render if these changed
   return (
     prevProps.square === nextProps.square &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.isWinning === nextProps.isWinning &&
+    prevProps.isXWinning === nextProps.isXWinning &&  // ✅ NEW
+    prevProps.isOWinning === nextProps.isOWinning &&  // ✅ NEW
     prevProps.isPlaying === nextProps.isPlaying
   );
 });
 
 Square.displayName = 'Square';
 
-// ✅ GameBoard Component - Now uses optimized Square
-const GameBoard = ({
-  board,
-  gameState,
-  selectedSquares,
-  selectSquare,
-  currentPlayer,
-  isPlaying,
-  winningLine
-}) => {
-  const { t } = useLanguage();
+// ✅ Compact Collapse Options Component (inline)
+const CollapseOptionsCompact = ({ gameState, apiGameState, chooseCollapse, t }) => {
+  const options = gameState.collapseOptions || apiGameState?.collapseOptions || [];
+
+  if (options.length === 0) {
+    return (
+      <div className="collapse-compact">
+        <div className="collapse-loading">
+          <span className="spinner-small"></span>
+          <span>{t('guide.collapse.generating')}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="game-board-container">
-      <div className="game-status">
-        {isPlaying && (
-          <div className="current-player">
-            {t('gameBoard.playerTurn', { player: currentPlayer })}
-            {selectedSquares.length > 0 && (
-              <span className="selection-count">
-                {' '}{t('gameBoard.squaresSelected', { count: selectedSquares.length })}
-              </span>
-            )}
-          </div>
-        )}
+    <div className="collapse-compact">
+      <div className="collapse-compact-header">
+        <span className="collapse-icon">🌀</span>
+        <span>{t('guide.collapse.optionsTitle')}</span>
       </div>
-
-      <div className="game-board">
-        <div className="board-grid">
-          {Array(9).fill().map((_, index) => (
-            <Square
-              key={index}
-              index={index}
-              square={board[index]}
-              isSelected={selectedSquares.includes(index)}
-              isWinning={winningLine.includes(index)}
-              isPlaying={isPlaying}
-              onSquareClick={selectSquare}
-            />
-          ))}
-        </div>
+      
+      <div className="collapse-compact-options">
+        {options.map((option, index) => (
+          <button 
+            key={index}
+            className="collapse-compact-btn"
+            onClick={() => chooseCollapse(option)}
+            title={Object.entries(option).map(([m, s]) => `${m}→${s+1}`).join(', ')}
+          >
+            <span className="option-label">{t('guide.collapse.option', { number: index + 1 })}</span>
+            <span className="option-preview">
+              {Object.entries(option).map(([moveId, square]) => (
+                <span key={moveId} className="mini-assignment">
+                  {moveId}→{square + 1}
+                </span>
+              ))}
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   );
 };
 
-// ✅ Main QuantumTicTacToe Component
+// ✅ GameBoard Component - UPDATED with dual winning lines
+const GameBoard = ({
+  board,
+  selectedSquares,
+  selectSquare,
+  currentPlayer,
+  isPlaying,
+  winningLine,
+  xWinningLine = [],  // ✅ NEW: X's winning line
+  oWinningLine = [],  // ✅ NEW: O's winning line
+  // Collapse props
+  isWaitingCollapse,
+  gameState,
+  apiGameState,
+  chooseCollapse
+}) => {
+  const { t } = useLanguage();
+
+  return (
+    <div className="game-board-wrapper">
+      <div className="game-board-container">
+        <div className="game-status">
+          {isPlaying && !isWaitingCollapse && (
+            <div className="current-player">
+              {t('gameBoard.playerTurn', { player: currentPlayer })}
+              {selectedSquares.length > 0 && (
+                <span className="selection-count">
+                  {' '}{t('gameBoard.squaresSelected', { count: selectedSquares.length })}
+                </span>
+              )}
+            </div>
+          )}
+          {isWaitingCollapse && (
+            <div className="collapse-status">
+               {t('guide.collapse.title')}
+            </div>
+          )}
+        </div>
+
+        <div className="game-board">
+          <div className="board-grid">
+            {Array(9).fill().map((_, index) => (
+              <Square
+                key={index}
+                index={index}
+                square={board[index]}
+                isSelected={selectedSquares.includes(index)}
+                isWinning={winningLine.includes(index)}
+                isXWinning={xWinningLine.includes(index)}  // ✅ NEW
+                isOWinning={oWinningLine.includes(index)}  // ✅ NEW
+                isPlaying={isPlaying && !isWaitingCollapse}
+                onSquareClick={selectSquare}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Collapse Options - Compact, below board */}
+      {isWaitingCollapse && (
+        <CollapseOptionsCompact 
+          gameState={gameState}
+          apiGameState={apiGameState}
+          chooseCollapse={chooseCollapse}
+          t={t}
+        />
+      )}
+    </div>
+  );
+};
+
+// Main QuantumTicTacToe Component
 const QuantumTicTacToe = () => {
   const gameHook = useGameState();
   const { t } = useLanguage();
 
-  // Error message mapper
   const getErrorMessage = (errorCode) => {
     const errorMap = {
       'ERROR_SERVER_DOWN': t('errors.serverDown'),
@@ -149,7 +233,6 @@ const QuantumTicTacToe = () => {
 
   return (
     <div className="quantum-tictactoe">
-      {/* Navbar with language switcher */}
       <Navbar />
 
       {/* Error Message Banner */}
@@ -173,36 +256,51 @@ const QuantumTicTacToe = () => {
 
       {/* Main game area */}
       <main className="game-main">
-        <div className="game-layout">
-          {/* Game Board */}
+        
+        {/* 3-Column Layout: Guide | Board + Collapse | Controls */}
+        <div className="game-layout-three-columns">
+          
+          {/* LEFT: Smart Guide Panel */}
+          <div className="guide-section">
+            <GuidePanel
+              gameState={gameHook.gameState}
+              apiGameState={gameHook.apiGameState}
+              isPlaying={gameHook.isPlaying}
+              isWaitingCollapse={gameHook.isWaitingCollapse}
+              isGameOver={gameHook.isGameOver}
+              winner={gameHook.winner}
+              selectedSquares={gameHook.selectedSquares}
+            />
+          </div>
+
+          {/* CENTER: Game Board + Collapse Options */}
           <div className="board-section">
             <GameBoard
               board={gameHook.board}
-              gameState={gameHook.gameState}
               selectedSquares={gameHook.selectedSquares}
               selectSquare={gameHook.selectSquare}
               currentPlayer={gameHook.currentPlayer}
               isPlaying={gameHook.isPlaying}
               winningLine={gameHook.winningLine}
+              xWinningLine={gameHook.xWinningLine}  // ✅ NEW
+              oWinningLine={gameHook.oWinningLine}  // ✅ NEW
+              isWaitingCollapse={gameHook.isWaitingCollapse}
+              gameState={gameHook.gameState}
+              apiGameState={gameHook.apiGameState}
+              chooseCollapse={gameHook.chooseCollapse}
             />
           </div>
 
-          {/* Guide Panel - Educational Interface */}
+          {/* RIGHT: Control Panel */}
           <div className="control-section">
-            <GuidePanel
-              gameState={gameHook.gameState}
-              apiGameState={gameHook.apiGameState}
+            <ControlPanel
               stats={gameHook.stats}
-              isPlaying={gameHook.isPlaying}
-              isWaitingCollapse={gameHook.isWaitingCollapse}
-              isGameOver={gameHook.isGameOver}
-              winner={gameHook.winner}
               resetGame={gameHook.resetGame}
-              chooseCollapse={gameHook.chooseCollapse}
-              selectedSquares={gameHook.selectedSquares}
             />
           </div>
+
         </div>
+
       </main>
       
       <Footer />
