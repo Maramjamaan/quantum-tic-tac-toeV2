@@ -1,0 +1,378 @@
+/* ==========================================
+   HOME PAGE - Quantum World
+   ========================================== */
+
+.home-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==========================================
+   FLOATING PARTICLES BACKGROUND
+   ========================================== */
+
+.particles-bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #06ffa5;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float-particle 5s ease-in-out infinite;
+}
+
+.particle:nth-child(odd) {
+  background: #a855f7;
+}
+
+.particle:nth-child(3n) {
+  background: #3b82f6;
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-30px) translateX(10px);
+    opacity: 0.6;
+  }
+}
+
+/* ==========================================
+   QUANTUM ATOM ANIMATION
+   ========================================== */
+
+.quantum-atom {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin-bottom: 40px;
+}
+
+.nucleus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 35px;
+  height: 35px;
+  background: radial-gradient(circle, #06ffa5 0%, #059669 100%);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 30px rgba(6, 255, 165, 0.6),
+    0 0 60px rgba(6, 255, 165, 0.3);
+  animation: pulse-nucleus 2s ease-in-out infinite;
+}
+
+@keyframes pulse-nucleus {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 
+      0 0 30px rgba(6, 255, 165, 0.6),
+      0 0 60px rgba(6, 255, 165, 0.3);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 
+      0 0 40px rgba(6, 255, 165, 0.8),
+      0 0 80px rgba(6, 255, 165, 0.4);
+  }
+}
+
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 2px solid rgba(6, 255, 165, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.orbit-1 {
+  width: 90px;
+  height: 90px;
+  animation: rotate-orbit 3s linear infinite;
+}
+
+.orbit-2 {
+  width: 130px;
+  height: 130px;
+  transform: translate(-50%, -50%) rotateX(60deg);
+  animation: rotate-orbit 4s linear infinite reverse;
+}
+
+.orbit-3 {
+  width: 170px;
+  height: 170px;
+  transform: translate(-50%, -50%) rotateY(60deg);
+  animation: rotate-orbit 5s linear infinite;
+}
+
+@keyframes rotate-orbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.electron {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #a855f7;
+  border-radius: 50%;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 
+    0 0 15px rgba(168, 85, 247, 0.8),
+    0 0 30px rgba(168, 85, 247, 0.4);
+}
+
+.orbit-2 .electron {
+  background: #3b82f6;
+  box-shadow: 
+    0 0 15px rgba(59, 130, 246, 0.8),
+    0 0 30px rgba(59, 130, 246, 0.4);
+}
+
+.orbit-3 .electron {
+  background: #06ffa5;
+  box-shadow: 
+    0 0 15px rgba(6, 255, 165, 0.8),
+    0 0 30px rgba(6, 255, 165, 0.4);
+}
+
+/* ==========================================
+   MAIN CONTENT
+   ========================================== */
+
+.home-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 10;
+  padding: 100px 20px 40px;
+}
+
+/* ==========================================
+   TITLE
+   ========================================== */
+
+.home-title {
+  font-size: 5rem;
+  font-weight: 800;
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1.1;
+}
+
+.title-quantum {
+  color: #06ffa5;
+  text-shadow: 
+    0 0 20px rgba(6, 255, 165, 0.5),
+    0 0 40px rgba(6, 255, 165, 0.3);
+  animation: glow-text 2s ease-in-out infinite alternate;
+}
+
+.title-world {
+  color: #fff;
+  font-size: 3.5rem;
+  opacity: 0.9;
+}
+
+@keyframes glow-text {
+  from {
+    text-shadow: 
+      0 0 20px rgba(6, 255, 165, 0.5),
+      0 0 40px rgba(6, 255, 165, 0.3);
+  }
+  to {
+    text-shadow: 
+      0 0 30px rgba(6, 255, 165, 0.7),
+      0 0 60px rgba(6, 255, 165, 0.4);
+  }
+}
+
+/* ==========================================
+   SUBTITLE
+   ========================================== */
+
+.home-subtitle {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 550px;
+  line-height: 1.7;
+  margin-bottom: 50px;
+}
+
+/* ==========================================
+   PLAY BUTTON
+   ========================================== */
+
+.play-button {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: linear-gradient(135deg, #06ffa5 0%, #059669 100%);
+  color: #0a0a1a;
+  border: none;
+  padding: 20px 50px;
+  border-radius: 50px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 10px 30px rgba(6, 255, 165, 0.3),
+    0 0 0 0 rgba(6, 255, 165, 0.4);
+}
+
+.play-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 15px 40px rgba(6, 255, 165, 0.4),
+    0 0 0 10px rgba(6, 255, 165, 0.1);
+}
+
+.play-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.play-arrow {
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.play-button:hover .play-arrow {
+  transform: translateX(5px);
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 768px) {
+  .home-content {
+    padding: 90px 20px 30px;
+  }
+  
+  .quantum-atom {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .home-title {
+    font-size: 3.5rem;
+  }
+  
+  .title-world {
+    font-size: 2.5rem;
+  }
+  
+  .home-subtitle {
+    font-size: 1.1rem;
+    padding: 0 20px;
+  }
+  
+  .play-button {
+    padding: 16px 35px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-title {
+    font-size: 2.8rem;
+  }
+  
+  .title-world {
+    font-size: 2rem;
+  }
+  
+  .quantum-atom {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* ==========================================
+   RTL SUPPORT (Arabic)
+   ========================================== */
+
+[dir="rtl"] .play-arrow {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .play-button:hover .play-arrow {
+  transform: rotate(180deg) translateX(5px);
+}
+
+/* Arabic Text Sizes - Bigger */
+html[lang="ar"] .home-title {
+  font-size: 5rem;
+}
+
+html[lang="ar"] .title-quantum {
+  font-size: 5rem;
+}
+
+html[lang="ar"] .title-world {
+  font-size: 3.5rem;
+}
+
+html[lang="ar"] .home-subtitle {
+  font-size: 1.5rem;
+  line-height: 2;
+  max-width: 600px;
+}
+
+html[lang="ar"] .play-button {
+  font-size: 1.5rem;
+  padding: 20px 50px;
+}
+
+/* Arabic Responsive */
+@media (max-width: 768px) {
+  html[lang="ar"] .home-title {
+    font-size: 3.2rem;
+  }
+  
+  html[lang="ar"] .title-quantum {
+    font-size: 3.2rem;
+  }
+  
+  html[lang="ar"] .title-world {
+    font-size: 2.5rem;
+  }
+  
+  html[lang="ar"] .home-subtitle {
+    font-size: 1.5rem;
+  }
+  
+  html[lang="ar"] .play-button {
+    font-size: 1.1rem;
+  }
+}

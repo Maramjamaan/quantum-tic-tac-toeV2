@@ -5,7 +5,11 @@ import arTranslations from '../translations/ar.json';
 const LanguageContext = createContext();
 
 const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en');
+  // جلب اللغة المحفوظة أو الافتراضية
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem('language');
+    return saved || 'en';
+  });
 
   const translations = {
     en: enTranslations,
@@ -16,9 +20,14 @@ const LanguageProvider = ({ children }) => {
     setLanguage(prev => prev === 'en' ? 'ar' : 'en');
   };
 
-  // تعيين lang للـ HTML
+  // حفظ اللغة + تغيير الاتجاه
   useEffect(() => {
+    // حفظ في localStorage
+    localStorage.setItem('language', language);
+    
+    // تعيين lang و dir للـ HTML
     document.documentElement.lang = language;
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
 
   const t = (key, params = {}) => {
@@ -63,5 +72,4 @@ const useLanguage = () => {
   return context;
 };
 
-// Export at the end to avoid circular dependency
 export { LanguageProvider, useLanguage };

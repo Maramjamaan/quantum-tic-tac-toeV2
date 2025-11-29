@@ -9,45 +9,13 @@
     "squaresSelected": "(Selected {{count}} of 2 squares)"
   },
 
-  "navbar": {
-    "about": {
-      "title": "Quantum Computing",
-      "history": "In 1982, physicist Richard Feynman proposed building computers based on quantum mechanics instead of classical physics. He realized that simulating quantum systems on traditional computers was extremely difficult. This idea led to the birth of quantum computing.",
-      "present": "Today, companies like IBM, Google, and Microsoft are building real quantum computers. In 2019, Google achieved 'Quantum Supremacy' - their quantum computer solved a problem in 200 seconds that would take a classical supercomputer 10,000 years.",
-      "future": "Quantum computing will transform many fields: drug discovery through molecular simulation, unbreakable encryption, faster AI algorithms, and complex optimization problems in logistics and finance.",
-      "concepts": "Core Quantum Concepts",
-      "superposition": "Superposition",
-      "superpositionDesc": "A classical bit is either 0 or 1. A quantum bit (qubit) can be both 0 and 1 at the same time. Think of a spinning coin - while spinning, it's neither heads nor tails, but both. Only when it lands does it become one or the other.",
-      "entanglement": "Entanglement",
-      "entanglementDesc": "When two qubits become entangled, measuring one instantly affects the other, no matter how far apart they are. Einstein called this 'spooky action at a distance'. This connection allows quantum computers to process correlated information efficiently.",
-      "collapse": "Collapse (Measurement)",
-      "collapseDesc": "When we measure a qubit in superposition, it 'collapses' into a definite state - either 0 or 1. The act of observation forces the qubit to choose. This is why quantum computers work differently - you cannot check intermediate results without changing them."
-    },
+   "navbar": {
+    "home": "Home",
+    "quantumComputing": "Quantum Computing",
     "howToPlay": {
-      "title": "How to Play",
-      "intro": "Quantum Tic-Tac-Toe applies quantum mechanics to the classic game. Each move demonstrates real quantum concepts.",
-      "step1Title": "Step 1: Make a Quantum Move",
-      "step1": "Select two squares instead of one. Your mark enters superposition - it exists in both squares simultaneously. Each move is numbered (X1, O2, etc.) and appears in both selected squares.",
-      "step2Title": "Step 2: Create Entanglement",
-      "step2": "When two moves share a square, they become entangled. You'll see multiple marks in the same square (like X1 and O2). These moves are now connected - the outcome of one affects the other.",
-      "step3Title": "Step 3: Trigger Collapse",
-      "step3": "When entangled moves form a cycle (a closed loop), collapse is triggered. The opponent of the player who completed the cycle chooses how the moves collapse. Each quantum move becomes a classical mark in one of its two squares.",
-      "step4Title": "Step 4: Win the Game",
-      "step4": "Get three classical marks in a row (horizontal, vertical, or diagonal). Only collapsed marks count - quantum moves still in superposition don't count toward winning."
+      "title": "How to Play"
     },
-    "rules": {
-      "title": "Game Rules",
-      "rule1Title": "Quantum Moves",
-      "rule1": "Every move must select exactly two squares. Your mark appears in both squares in superposition.",
-      "rule2Title": "Entanglement",
-      "rule2": "When moves share a square, they become entangled. Their outcomes become linked.",
-      "rule3Title": "Cycle and Collapse",
-      "rule3": "When entangled moves form a closed loop (cycle), collapse occurs. The opponent chooses from available collapse options.",
-      "rule4Title": "Winning",
-      "rule4": "Three classical (collapsed) marks in a row wins. Quantum marks in superposition don't count.",
-      "rule5Title": "Restrictions",
-      "rule5": "You cannot select squares with classical marks. You can only select empty squares or squares with quantum moves."
-    }
+    "playGame": "Play Game"
   },
 
   "guide": {
@@ -134,5 +102,86 @@
     "resetFailure": "Failed to reset game. Try again",
     "noSquaresAvailable": "No squares available for quantum moves",
     "genericError": "An unexpected error occurred"
+  },
+  
+  "home": {
+    "titleQuantum": "Quantum Tic-Tac-Toe ",
+    "titleWorld": "",
+    "subtitle": " A game-based Approach to Understand Quantum Mechanics ",
+    "playButton": "Start"
+  }, 
+ 
+  "quantumComputing": {
+    "hero": {
+      "title": "Quantum Computing",
+      "subtitle": "Discover the technology that will change the world"
+    },
+    "what": {
+      "title": "What is Quantum Computing?",
+      "imagePlaceholder": "Quantum Computer Image",
+      "description": "Quantum computing harnesses the strange laws of quantum mechanics to process information in ways impossible for classical computers. Instead of bits that are either 0 or 1, quantum computers use qubits that can be both at once."
+    },
+    "comparison": {
+      "title": "Classical vs Quantum",
+      "or": "or",
+      "classical": {
+        "title": "Classical Computer",
+        "point1": "Uses bits (0 or 1)",
+        "point2": "Processes one calculation at a time",
+        "point3": "Limited by physical transistors"
+      },
+      "quantum": {
+        "title": "Quantum Computer",
+        "point1": "Uses qubits (0 and 1 simultaneously)",
+        "point2": "Processes millions of calculations at once",
+        "point3": "Powered by quantum mechanics"
+      }
+    },
+    "principles": {
+      "title": "Quantum Principles",
+      "superposition": {
+        "title": "Superposition",
+        "description": "A qubit can exist in multiple states at the same time — like being in two places at once, until you observe it."
+      },
+      "entanglement": {
+        "title": "Entanglement",
+        "description": "Two qubits become connected. Change one, and the other instantly changes too — no matter how far apart they are."
+      },
+      "measurement": {
+        "title": "Measurement",
+        "description": "When you observe a qubit, it 'collapses' from many possibilities into one definite state."
+      }
+    },
+    "hardware": {
+      "title": "Quantum Hardware",
+      "ibm": "IBM's quantum computers use superconducting qubits cooled to near absolute zero.",
+      "microsoft": "Microsoft's Majorana 1 chip uses topological qubits for more stable quantum computing.",
+      "google": "Google's Sycamore processor achieved quantum supremacy in 2019."
+    },
+    "applications": {
+      "title": "Real-World Applications",
+      "medicine": {
+        "title": "Medicine",
+        "description": "Simulating molecules to discover new drugs faster"
+      },
+      "security": {
+        "title": "Cryptography",
+        "description": "Unbreakable encryption and secure communications"
+      },
+      "ai": {
+        "title": "Artificial Intelligence",
+        "description": "Accelerating machine learning and optimization"
+      },
+      "climate": {
+        "title": "Climate",
+        "description": "Modeling complex climate systems accurately"
+      }
+    },
+    "cta": {
+      "title": "Experience Quantum Mechanics",
+      "description": "Try these concepts yourself in our interactive quantum game",
+      "button": "Play Quantum Tic-Tac-Toe"
+    }
   }
+
 }

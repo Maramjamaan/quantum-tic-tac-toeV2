@@ -1,33 +1,67 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import './Navbar.css';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { language, toggleLanguage, t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [expandedSection, setExpandedSection] = useState(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    if (!isMenuOpen) {
-      setExpandedSection(null);
-    }
   };
 
-  const toggleSection = (section) => {
-    setExpandedSection(expandedSection === section ? null : section);
+  const handleNavigation = (path) => {
+    navigate(path);
+    setIsMenuOpen(false);
   };
+
+  const isActive = (path) => location.pathname === path;
+
+  // Navigation items with direct labels (no nested keys)
+  const navItems = [
+    { path: '/', labelEn: 'Home', labelAr: 'الرئيسية' },
+    { path: '/quantum-computing', labelEn: 'Quantum Computing', labelAr: 'الحوسبة الكمية' },
+    { path: '/how-to-play', labelEn: 'How to Play', labelAr: 'كيف تلعب' },
+    { path: '/game', labelEn: 'Play Game', labelAr: 'العب الآن' },
+  ];
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
         {/* Logo */}
-        <div className="navbar-logo">
+        <div className="navbar-logo" onClick={() => handleNavigation('/')}>
           <span className="logo-icon">Q</span>
           <span className="logo-text">{t('title')}</span>
         </div>
 
-        {/* Menu Toggle Button */}
+        {/* Desktop Navigation Links */}
+        <ul className="navbar-links">
+          {navItems.map((item) => (
+            <li key={item.path}>
+              <button
+                className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+                onClick={() => handleNavigation(item.path)}
+              >
+                {language === 'en' ? item.labelEn : item.labelAr}
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {/* Language Switcher */}
+        <button 
+          className="language-btn"
+          onClick={toggleLanguage}
+        >
+          <span className="lang-text">
+            {language === 'en' ? 'العربية' : 'English'}
+          </span>
+        </button>
+
+        {/* Menu Toggle Button (Mobile) */}
         <button 
           className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
           onClick={toggleMenu}
@@ -37,93 +71,20 @@ const Navbar = () => {
           <span className="menu-line"></span>
           <span className="menu-line"></span>
         </button>
-
-        {/* Language Switcher */}
-        <button 
-          className="language-btn"
-          onClick={toggleLanguage}
-        >
-          <span className="lang-icon">🌐</span>
-          <span className="lang-text">
-            {language === 'en' ? 'العربية' : 'English'}
-          </span>
-        </button>
       </div>
 
-      {/* Dropdown Menu */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="navbar-menu">
-          {/* About Section */}
-          <div className="menu-section">
-            <button 
-              className={`section-header ${expandedSection === 'about' ? 'active' : ''}`}
-              onClick={() => toggleSection('about')}
+          {navItems.map((item) => (
+            <button
+              key={item.path}
+              className={`mobile-nav-link ${isActive(item.path) ? 'active' : ''}`}
+              onClick={() => handleNavigation(item.path)}
             >
-              <span>{t('navbar.about.title')}</span>
-              <span className="arrow">{expandedSection === 'about' ? '▼' : '▶'}</span>
+              {language === 'en' ? item.labelEn : item.labelAr}
             </button>
-            {expandedSection === 'about' && (
-              <div className="section-content">
-                
-                <ul>
-                  <li>
-                    <strong>{t('navbar.about.superposition')}</strong>
-                    <p>{t('navbar.about.superpositionDesc')}</p>
-                  </li>
-                  <li>
-                    <strong>{t('navbar.about.entanglement')}</strong>
-                    <p>{t('navbar.about.entanglementDesc')}</p>
-                  </li>
-                  <li>
-                    <strong>{t('navbar.about.collapse')}</strong>
-                    <p>{t('navbar.about.collapseDesc')}</p>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* How to Play Section */}
-          <div className="menu-section">
-            <button 
-              className={`section-header ${expandedSection === 'howto' ? 'active' : ''}`}
-              onClick={() => toggleSection('howto')}
-            >
-              <span>{t('navbar.howToPlay.title')}</span>
-              <span className="arrow">{expandedSection === 'howto' ? '▼' : '▶'}</span>
-            </button>
-            {expandedSection === 'howto' && (
-              <div className="section-content">
-                <ol>
-                  <li>{t('navbar.howToPlay.step1')}</li>
-                  <li>{t('navbar.howToPlay.step2')}</li>
-                  <li>{t('navbar.howToPlay.step3')}</li>
-                  <li>{t('navbar.howToPlay.step4')}</li>
-                </ol>
-              </div>
-            )}
-          </div>
-
-          {/* Rules Section */}
-          <div className="menu-section">
-            <button 
-              className={`section-header ${expandedSection === 'rules' ? 'active' : ''}`}
-              onClick={() => toggleSection('rules')}
-            >
-              <span>{t('navbar.rules.title')}</span>
-              <span className="arrow">{expandedSection === 'rules' ? '▼' : '▶'}</span>
-            </button>
-            {expandedSection === 'rules' && (
-              <div className="section-content">
-                <ul>
-                  <li>{t('navbar.rules.rule1')}</li>
-                  <li>{t('navbar.rules.rule2')}</li>
-                  <li>{t('navbar.rules.rule3')}</li>
-                  <li>{t('navbar.rules.rule4')}</li>
-                </ul>
-              </div>
-            )}
-          </div>
+          ))}
         </div>
       )}
     </nav>
