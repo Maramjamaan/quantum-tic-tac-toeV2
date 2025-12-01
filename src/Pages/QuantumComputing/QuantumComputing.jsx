@@ -8,18 +8,26 @@ import {
   Link, 
   Eye, 
   Monitor, 
-  Cpu, 
   Pill, 
   Lock, 
-  Bot, 
-  Globe, 
+  TrendingUp, 
+  Truck, 
   Gamepad2,
   ChevronDown,
   ArrowRight,
   Zap,
-  Sparkles
+  Sparkles,
+  Snowflake,
+  Microchip,
+  Lightbulb
 } from 'lucide-react';
 import './QuantumComputing.css';
+
+// Images
+import googleQuantumImg from '../../assets/images/google-quantum.jpg';
+
+import googleWillowImg from '../../assets/images/google-willow-chip.jpg';
+import quantumComputerMainImg from '../../assets/images/quantum-computer-main.jpg';
 
 const QuantumComputing = () => {
   const navigate = useNavigate();
@@ -66,9 +74,8 @@ const QuantumComputing = () => {
           <h2 className="qc-section-title">{t('quantumComputing.what.title')}</h2>
           <div className="qc-what-content">
             <div className="qc-what-visual">
-              <div className="quantum-computer-placeholder">
-                <Cpu size={64} className="qc-placeholder-icon" />
-                <span>{t('quantumComputing.what.imagePlaceholder')}</span>
+              <div className="qc-main-image">
+                <img src={quantumComputerMainImg} alt="Quantum Computer" />
               </div>
             </div>
             <div className="qc-what-text">
@@ -240,37 +247,58 @@ const QuantumComputing = () => {
         </div>
       </section>
 
-      {/* Quantum Hardware */}
-      <section className="qc-section qc-hardware">
+      {/* Inside a Quantum Computer */}
+      <section className="qc-section qc-inside">
         <div className="qc-container">
-          <h2 className="qc-section-title">{t('quantumComputing.hardware.title')}</h2>
-          <div className="hardware-grid">
-            {/* IBM */}
-            <div className="hardware-card">
-              <div className="hardware-image-placeholder">
-                <span>IBM Quantum</span>
+          <h2 className="qc-section-title">{t('quantumComputing.inside.title')}</h2>
+          <p className="qc-section-subtitle">{t('quantumComputing.inside.subtitle')}</p>
+          
+          <div className="inside-comparison">
+            {/* Cooling System */}
+            <div className="inside-card cooling">
+              <div className="inside-image">
+                <img src={googleQuantumImg} alt="Quantum Cooling System" />
               </div>
-              <h3>IBM Quantum</h3>
-              <p>{t('quantumComputing.hardware.ibm')}</p>
+              <div className="inside-content">
+                <div className="inside-icon">
+                  <Snowflake size={32} />
+                </div>
+                <h3>{t('quantumComputing.inside.cooling.title')}</h3>
+                <ul className="inside-list">
+                  <li>{t('quantumComputing.inside.cooling.point1')}</li>
+                  <li>{t('quantumComputing.inside.cooling.point2')}</li>
+                  <li>{t('quantumComputing.inside.cooling.point3')}</li>
+                  <li>{t('quantumComputing.inside.cooling.point4')}</li>
+                  <li>{t('quantumComputing.inside.cooling.point5')}</li>
+                </ul>
+              </div>
             </div>
 
-            {/* Microsoft */}
-            <div className="hardware-card">
-              <div className="hardware-image-placeholder microsoft">
-                <span>Microsoft Majorana</span>
+            {/* Quantum Chip */}
+            <div className="inside-card chip">
+              <div className="inside-image">
+                <img src={googleWillowImg} alt="Quantum Chip" />
               </div>
-              <h3>Microsoft Majorana 1</h3>
-              <p>{t('quantumComputing.hardware.microsoft')}</p>
+              <div className="inside-content">
+                <div className="inside-icon">
+                  <Microchip size={32} />
+                </div>
+                <h3>{t('quantumComputing.inside.chip.title')}</h3>
+                <ul className="inside-list">
+                  <li>{t('quantumComputing.inside.chip.point1')}</li>
+                  <li>{t('quantumComputing.inside.chip.point2')}</li>
+                  <li>{t('quantumComputing.inside.chip.point3')}</li>
+                  <li>{t('quantumComputing.inside.chip.point4')}</li>
+                  <li>{t('quantumComputing.inside.chip.point5')}</li>
+                </ul>
+              </div>
             </div>
+          </div>
 
-            {/* Google */}
-            <div className="hardware-card">
-              <div className="hardware-image-placeholder google">
-                <span>Google Sycamore</span>
-              </div>
-              <h3>Google Sycamore</h3>
-              <p>{t('quantumComputing.hardware.google')}</p>
-            </div>
+          {/* Insight Box */}
+          <div className="insight-box">
+            <Lightbulb size={24} />
+            <p>{t('quantumComputing.inside.insight')}</p>
           </div>
         </div>
       </section>
@@ -289,6 +317,13 @@ const QuantumComputing = () => {
             </div>
             <div className="app-card">
               <div className="app-icon">
+                <TrendingUp size={40} />
+              </div>
+              <h3>{t('quantumComputing.applications.finance.title')}</h3>
+              <p>{t('quantumComputing.applications.finance.description')}</p>
+            </div>
+            <div className="app-card">
+              <div className="app-icon">
                 <Lock size={40} />
               </div>
               <h3>{t('quantumComputing.applications.security.title')}</h3>
@@ -296,17 +331,10 @@ const QuantumComputing = () => {
             </div>
             <div className="app-card">
               <div className="app-icon">
-                <Bot size={40} />
+                <Truck size={40} />
               </div>
-              <h3>{t('quantumComputing.applications.ai.title')}</h3>
-              <p>{t('quantumComputing.applications.ai.description')}</p>
-            </div>
-            <div className="app-card">
-              <div className="app-icon">
-                <Globe size={40} />
-              </div>
-              <h3>{t('quantumComputing.applications.climate.title')}</h3>
-              <p>{t('quantumComputing.applications.climate.description')}</p>
+              <h3>{t('quantumComputing.applications.optimization.title')}</h3>
+              <p>{t('quantumComputing.applications.optimization.description')}</p>
             </div>
           </div>
         </div>

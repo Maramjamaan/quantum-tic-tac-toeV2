@@ -110,7 +110,6 @@
     "subtitle": " A game-based Approach to Understand Quantum Mechanics ",
     "playButton": "Start"
   }, 
- 
   "quantumComputing": {
     "hero": {
       "title": "Quantum Computing",
@@ -118,8 +117,7 @@
     },
     "what": {
       "title": "What is Quantum Computing?",
-      "imagePlaceholder": "Quantum Computer Image",
-      "description": "Quantum computing harnesses the strange laws of quantum mechanics to process information in ways impossible for classical computers. Instead of bits that are either 0 or 1, quantum computers use qubits that can be both at once."
+      "description": "Quantum computing harnesses the strange laws of quantum mechanics to process information in ways impossible for classical computers. Instead of bits that are either 0 or 1, quantum computers use qubits that can be both at once — enabling them to solve in minutes what would take supercomputers millions of years."
     },
     "comparison": {
       "title": "Classical vs Quantum",
@@ -152,29 +150,44 @@
         "description": "When you observe a qubit, it 'collapses' from many possibilities into one definite state."
       }
     },
-    "hardware": {
-      "title": "Quantum Hardware",
-      "ibm": "IBM's quantum computers use superconducting qubits cooled to near absolute zero.",
-      "microsoft": "Microsoft's Majorana 1 chip uses topological qubits for more stable quantum computing.",
-      "google": "Google's Sycamore processor achieved quantum supremacy in 2019."
+    "inside": {
+      "title": "Inside a Quantum Computer",
+      "subtitle": "The giant structure isn't the computer — it's just keeping the tiny chip cold!",
+      "cooling": {
+        "title": "Cooling System",
+        "point1": "Size of an entire room (3 meters tall)",
+        "point2": "Cools to -273°C — 100x colder than outer space!",
+        "point3": "Takes days to reach the required temperature",
+        "point4": "Any tiny vibration destroys the calculations",
+        "point5": "Costs millions of dollars to build and operate"
+      },
+      "chip": {
+        "title": "Quantum Chip",
+        "point1": "Size of a fingernail or small coin",
+        "point2": "Contains 50 to 1000+ qubits",
+        "point3": "Qubits survive only microseconds!",
+        "point4": "Any light or sound ruins the computations",
+        "point5": "This tiny chip IS the actual quantum computer"
+      },
+      "insight": "The giant golden structure exists only to protect the tiny chip inside. Without extreme cooling, qubits lose their quantum properties in microseconds!"
     },
     "applications": {
       "title": "Real-World Applications",
       "medicine": {
-        "title": "Medicine",
-        "description": "Simulating molecules to discover new drugs faster"
+        "title": "Drug Discovery",
+        "description": "Simulating molecular interactions to design new medicines — what takes years could take days"
+      },
+      "finance": {
+        "title": "Financial Modeling",
+        "description": "HSBC improved bond trading predictions by 34% using quantum computing in 2025"
       },
       "security": {
         "title": "Cryptography",
-        "description": "Unbreakable encryption and secure communications"
+        "description": "Building unbreakable quantum encryption for secure communications"
       },
-      "ai": {
-        "title": "Artificial Intelligence",
-        "description": "Accelerating machine learning and optimization"
-      },
-      "climate": {
-        "title": "Climate",
-        "description": "Modeling complex climate systems accurately"
+      "optimization": {
+        "title": "Logistics & Optimization",
+        "description": "Ford reduced scheduling time from 30 minutes to under 5 using quantum optimization"
       }
     },
     "cta": {
@@ -182,6 +195,85 @@
       "description": "Try these concepts yourself in our interactive quantum game",
       "button": "Play Quantum Tic-Tac-Toe"
     }
+  },
+  "howToPlay": {
+    "hero": {
+      "title": "How to Play",
+      "subtitle": "Learn Quantum Tic-Tac-Toe in minutes"
+    },
+    "comparison": {
+      "title": "What's Different?",
+      "classic": {
+        "title": "Classic Tic-Tac-Toe",
+        "desc": "One mark, one square, simple and direct."
+      },
+      "quantum": {
+        "title": "Quantum Tic-Tac-Toe",
+        "desc": "One mark in TWO squares at once — until it collapses!"
+      }
+    },
+    "rules": {
+      "rule1": {
+        "title": "The Quantum Move",
+        "desc": "On your turn, place your mark in TWO different squares. Your mark exists in both places at the same time — this is called superposition. Each move gets a subscript number (X₁, O₂, X₃...) to track the order.",
+        "stepLabel": "Move 1: X₁ → Squares 1, 2",
+        "caption": "X₁ exists in both squares simultaneously — connected by quantum entanglement!"
+      },
+      "rule2": {
+        "title": "Entanglement",
+        "desc": "Entanglement happens when a player places their mark in a square that already contains another mark. Now these marks are connected — what happens to one affects the other!",
+        "move": "Move",
+        "squares": "Squares",
+        "why": "Why are they entangled?",
+        "because": "X₁ and O₂ share square 2. They cannot both collapse there — only one can stay!",
+        "shareSquare": "Share square",
+        "result": "What does this mean?",
+        "if1": "If X₁ collapses to square 2 → O₂ must go to square 5",
+        "if2": "If O₂ collapses to square 2 → X₁ must go to square 1"
+      },
+      "rule3": {
+        "title": "The Cycle",
+        "desc": "A cycle forms when entangled marks create a closed loop. When you can trace from one mark back to itself through shared squares — that's a cycle! A cycle triggers immediate collapse.",
+        "move": "Move",
+        "cycleDetected": "Cycle Detected!",
+        "cycleExplanation": "X₁ ↔ O₂ ↔ X₃ ↔ X₁ forms a closed loop!"
+      },
+      "rule4": {
+        "title": "The Collapse",
+        "desc": "When a cycle forms, the player who did NOT create it gets to choose where the first mark collapses. Then all other marks collapse automatically in a chain reaction!",
+        "whoChooses": "O Chooses!",
+        "chooserExplanation": "X created the cycle (Move 3), so O decides the collapse",
+        "option": "Option",
+        "choose": "Choose",
+        "or": "OR",
+        "getsCenter": "gets the center",
+        "bestChoice": "O chooses Option 1 — she gets the strategic center square!"
+      },
+      "rule5": {
+        "title": "Winning",
+        "desc": "Get three COLLAPSED marks in a row (horizontal, vertical, or diagonal) to win. Quantum marks in superposition don't count — only classical collapsed marks!",
+        "xWins": "X Wins!",
+        "caption": "Three collapsed X marks in a row — victory!"
+      }
+    },
+    "special": {
+      "title": "⚡ Special Case: Simultaneous Win",
+      "desc": "Sometimes when marks collapse, both players complete a row at the same time! When this happens, the player whose winning mark has the LOWER subscript number wins.",
+      "xWins": "X Wins!",
+      "tip": "X₃ beats O₄ because 3 < 4. The earlier move has priority — placing marks early matters!"
+    },
+    "summary": {
+      "title": "Quick Summary",
+      "step1": "Place mark in 2 squares",
+      "step2": "Shared squares = entanglement",
+      "step3": "Closed loop = cycle",
+      "step4": "Opponent chooses collapse",
+      "step5": "3 collapsed marks = Win!"
+    },
+    "cta": {
+      "title": "Ready to Play?",
+      "desc": "Put your quantum strategy to the test!",
+      "button": "Start Playing"
+    }
   }
-
 }

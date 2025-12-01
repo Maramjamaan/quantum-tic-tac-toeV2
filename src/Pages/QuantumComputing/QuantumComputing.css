@@ -206,24 +206,19 @@
   justify-content: center;
 }
 
-.quantum-computer-placeholder {
+.qc-main-image {
   width: 100%;
-  max-width: 400px;
-  height: 300px;
-  background: rgba(30, 30, 66, 0.6);
-  border: 2px dashed rgba(6, 255, 165, 0.3);
+  max-width: 450px;
   border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(6, 255, 165, 0.2);
+  border: 2px solid rgba(6, 255, 165, 0.3);
 }
 
-.qc-placeholder-icon {
-  color: rgba(6, 255, 165, 0.5);
-  margin-bottom: 10px;
+.qc-main-image img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .qc-what-text p {
@@ -465,7 +460,7 @@
   background: rgba(30, 30, 66, 0.6);
   border: 1px solid rgba(6, 255, 165, 0.2);
   border-radius: 20px;
-  padding: 40px;
+  padding: 30px;
   text-align: center;
   animation: fadeIn 0.3s ease;
 }
@@ -682,8 +677,201 @@
 }
 
 /* ==========================================
-   QUANTUM HARDWARE
+   INSIDE QUANTUM COMPUTER SECTION
    ========================================== */
+
+.qc-section-subtitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  margin-top: -30px;
+  margin-bottom: 50px;
+}
+
+.inside-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.inside-card {
+  background: rgba(30, 30, 66, 0.6);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid rgba(100, 100, 150, 0.3);
+  transition: all 0.3s ease;
+}
+
+.inside-card:hover {
+  transform: translateY(-5px);
+}
+
+.inside-card.cooling {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.inside-card.cooling:hover {
+  box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+}
+
+.inside-card.chip {
+  border-color: rgba(6, 255, 165, 0.4);
+}
+
+.inside-card.chip:hover {
+  box-shadow: 0 10px 40px rgba(6, 255, 165, 0.2);
+}
+
+.inside-image {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.inside-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.inside-card:hover .inside-image img {
+  transform: scale(1.05);
+}
+
+.inside-content {
+  padding: 30px;
+}
+
+.inside-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.inside-card.cooling .inside-icon {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.inside-card.chip .inside-icon {
+  background: rgba(6, 255, 165, 0.2);
+  color: #06ffa5;
+}
+
+.inside-content h3 {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.inside-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.inside-list li {
+  padding: 12px 0;
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.inside-list li:last-child {
+  border-bottom: none;
+}
+
+.inside-list li::before {
+  content: '→';
+  color: #06ffa5;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.insight-box {
+  background: linear-gradient(135deg, rgba(6, 255, 165, 0.1), rgba(168, 85, 247, 0.1));
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  border-radius: 16px;
+  padding: 25px 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #fff;
+}
+
+.insight-box svg {
+  color: #06ffa5;
+  flex-shrink: 0;
+}
+
+.insight-box p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+
+
+
+/* ==========================================
+   RESPONSIVE - INSIDE SECTION
+   ========================================== */
+
+@media (max-width: 900px) {
+  .inside-comparison {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .inside-image {
+    height: 200px;
+  }
+}
+
+@media (max-width: 600px) {
+  .breakthrough-item {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .breakthrough-year {
+    width: 70px;
+    height: 70px;
+    font-size: 1rem;
+  }
+
+  .insight-box {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* ==========================================
+   RTL SUPPORT - NEW SECTIONS
+   ========================================== */
+
+html[dir="rtl"] .inside-list li::before {
+  content: '←';
+}
+
+html[dir="rtl"] .breakthrough-item {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .insight-box {
+  flex-direction: row-reverse;
+}
 
 .hardware-grid {
   display: grid;
@@ -706,28 +894,23 @@
   box-shadow: 0 10px 40px rgba(6, 255, 165, 0.15);
 }
 
-.hardware-image-placeholder {
+.hardware-image {
   width: 100%;
-  height: 180px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+  height: 200px;
   border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
   margin-bottom: 20px;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 600;
-  border: 2px dashed rgba(59, 130, 246, 0.3);
 }
 
-.hardware-image-placeholder.microsoft {
-  background: linear-gradient(135deg, rgba(6, 255, 165, 0.2), rgba(6, 255, 165, 0.1));
-  border-color: rgba(6, 255, 165, 0.3);
+.hardware-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-.hardware-image-placeholder.google {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1));
-  border-color: rgba(168, 85, 247, 0.3);
+.hardware-card:hover .hardware-image img {
+  transform: scale(1.05);
 }
 
 .hardware-card h3 {

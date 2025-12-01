@@ -43,8 +43,8 @@ const GuidePanel = ({
         if (winner) {
           // ✅ Check for simultaneous win from apiGameState
           const isSimultaneous = apiGameState?.is_simultaneous === true;
-          const xScore = apiGameState?.x_score || 0;
-          const oScore = apiGameState?.o_score || 0;
+          // const xScore = apiGameState?.x_score || 0;
+          // const oScore = apiGameState?.o_score || 0;
           
           console.log('🎯 Rendering gameOver - isSimultaneous:', isSimultaneous);
           

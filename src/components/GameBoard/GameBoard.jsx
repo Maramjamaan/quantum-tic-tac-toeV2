@@ -10,14 +10,14 @@ const GameBoard = ({
   currentPlayer, 
   isPlaying, 
   winningLine = [],
-  xWinningLine = [],  // ✅ NEW: X's winning line (green glow)
-  oWinningLine = []   // ✅ NEW: O's winning line (purple glow)
+  xWinningLine = [],  
+  oWinningLine = []   
 }) => {
   const renderSquare = (index) => {
     const square = board[index];
     const isSelected = selectedSquares.includes(index);
     
-    // ✅ Check which winning line(s) this square belongs to
+    // Check which winning line(s) this square belongs to
     const isXWinning = xWinningLine.includes(index);
     const isOWinning = oWinningLine.includes(index);
     const isWinning = winningLine.includes(index) || isXWinning || isOWinning;
@@ -27,7 +27,7 @@ const GameBoard = ({
       
       if (isSelected) classes.push('selected');
       
-      // ✅ Different classes for X and O winning lines
+      // Different classes for X and O winning lines
       if (isXWinning && isOWinning) {
         // Square is in BOTH winning lines (rare but possible)
         classes.push('winning', 'winning-both');
