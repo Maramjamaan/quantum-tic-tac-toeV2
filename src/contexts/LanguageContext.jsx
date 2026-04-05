@@ -3,29 +3,21 @@ import enTranslations from '../translations/en.json';
 import arTranslations from '../translations/ar.json';
 
 const LanguageContext = createContext();
-
 const LanguageProvider = ({ children }) => {
-  // جلب اللغة المحفوظة أو الافتراضية
   const [language, setLanguage] = useState(() => {
     const saved = localStorage.getItem('language');
     return saved || 'en';
   });
-
   const translations = {
     en: enTranslations,
     ar: arTranslations
   };
-
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'ar' : 'en');
   };
-
-  // حفظ اللغة + تغيير الاتجاه
   useEffect(() => {
-    // حفظ في localStorage
+   
     localStorage.setItem('language', language);
-    
-    // تعيين lang و dir للـ HTML
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
@@ -40,13 +32,12 @@ const LanguageProvider = ({ children }) => {
         return key;
       }
     }
-    
     if (typeof value === 'string' && Object.keys(params).length > 0) {
       return value.replace(/\{\{(\w+)\}\}/g, (match, param) => {
         return params[param] !== undefined ? params[param] : match;
       });
     }
-    
+  
     return value;
   };
 

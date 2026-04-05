@@ -69,7 +69,7 @@ class QuantumMove:
         circuit = QuantumCircuit(qreg, creg)  # Combine them
         
         # Apply Hadamard gate: puts qubit in superposition 
-        # This is the quantum magic! Now it's (50% 0 + 50% 1)
+        # Now it's (50% 0 + 50% 1)
         circuit.h(qreg[0])
         
         # Add measurement: when we measure, it collapses to 0 or 1
@@ -161,9 +161,23 @@ class QuantumTicTacToe:
             
             return {
                 'success': False,
-                'error': 'Game is already over',
+                'error': 'GAME_ALREADY_OVER',
                 'winner': winner,
                 'is_draw': is_draw,
+                'game_state': self.game_state.to_dict()
+            }
+        
+        # ✅ NEW STEP: Check if only 2 or fewer empty squares remain
+        empty_squares = [i for i, sq in enumerate(self.game_state.board) if sq is None]
+        
+        if len(empty_squares) <= 2:
+            logger.info(f"Not enough squares: only {len(empty_squares)} empty squares remaining")
+            return {
+                'success': False,
+                'error': 'NOT_ENOUGH_SQUARES',
+                'message': 'Game over - not enough empty squares for quantum moves',
+                'empty_squares': len(empty_squares),
+                'is_draw': True,
                 'game_state': self.game_state.to_dict()
             }
         
@@ -210,6 +224,24 @@ class QuantumTicTacToe:
             # ← MODIFIED: Pass cycle_move_ids to generate options for this cycle only
             collapse_options = self.generate_collapse_options(max_options=3, cycle_moves=cycle_move_ids)
             logger.info(f"Generated {len(collapse_options)} collapse options")
+            
+            # ✅ NEW: If no valid collapse options, this is an impossible state
+            if len(collapse_options) == 0:
+                logger.warning("Cycle detected but no valid collapse options - impossible state!")
+                # Remove the move we just added since it creates an impossible state
+                self.game_state.moves.pop()
+                self.game_state.move_count -= 1
+                # Remove entanglements we just added
+                for ent in new_entanglements:
+                    if ent in self.game_state.entanglements:
+                        self.game_state.entanglements.remove(ent)
+                
+                return {
+                    'success': False,
+                    'error': 'IMPOSSIBLE_COLLAPSE',
+                    'message': 'This move would create an impossible collapse situation',
+                    'game_state': self.game_state.to_dict()
+                }
         
         
         # STEP 7: Handle player switching and cycle logic
@@ -364,7 +396,6 @@ class QuantumTicTacToe:
     
        # Find entanglements between the new move and existing moves.
        # Two moves are entangled if they share a square!
-        
         entanglements = []
         # Check every existing move
         for existing_move in self.game_state.moves:
@@ -375,7 +406,7 @@ class QuantumTicTacToe:
             # Skip if it already collapsed
             if existing_move.collapsed:
                 continue
-            
+
             # Find shared squares using set intersection
             shared_squares = set(new_move.squares) & set(existing_move.squares)
             
@@ -394,19 +425,12 @@ class QuantumTicTacToe:
     
 
     # CYCLE DETECTION - Graph Theory!
-    # ← FIXED: Proper cycle detection with correct path tracking
+    # Proper cycle detection with correct path tracking
     def _check_for_cycles(self) -> Tuple[bool, List[str]]:
        
         #Check if entanglements form a cycle.
         #A cycle is a closed loop in the entanglement graph.
-        #Example: X1 -> O1 -> X2 -> X1 (connects back to start)
         #Using DFS with proper path tracking.
-        
-        # Returns:
-        #     (has_cycle: bool, cycle_moves: List[str])
-        #     - has_cycle: True if cycle detected
-        #     - cycle_moves: List of move IDs in the detected cycle
-       
         # STEP 1: Build graph from entanglements (using SET to avoid duplicates)
         graph = {}
         
@@ -422,7 +446,6 @@ class QuantumTicTacToe:
                 graph[ent.move1_id] = set()
             if ent.move2_id not in graph:
                 graph[ent.move2_id] = set()
-            
             # Add edges (using set.add to avoid duplicates)
             graph[ent.move1_id].add(ent.move2_id)
             graph[ent.move2_id].add(ent.move1_id)
@@ -435,17 +458,7 @@ class QuantumTicTacToe:
         visited = set()
         
         def find_cycle_dfs(node: str, parent: str, path: List[str]) -> List[str]:
-            """
-            DFS that returns the cycle moves if found, empty list otherwise.
-            
-            Args:
-                node: Current node being visited
-                parent: Node we came from (to avoid going backwards)
-                path: Current path from start node
-            
-            Returns:
-                List of move IDs in cycle, or empty list if no cycle
-            """
+            # DFS that returns the cycle moves if found, empty list otherwise.
             visited.add(node)
             path.append(node)
             
@@ -551,61 +564,42 @@ class QuantumTicTacToe:
         
         return all_cycles
     def _identify_stems(self, cycle_moves: List[str]) -> Dict[str, int]:
-        """
-        تحدد الحركات المتشابكة مع الدورة (stems) وترجع المربع الوحيد لانهيارها
-        
-        Stem = حركة متشابكة مع الدورة لكن ليست جزءاً منها
-        حسب ورقة Allan Goff: "Stems have only one possible collapse state"
-        
-        Args:
-            cycle_moves: قائمة بـ move_ids الموجودة في الدورة
-        
-        Returns:
-            Dict {move_id: forced_square} للحركات التي يجب أن تنهار تلقائياً
-        """
+        # Identify stems connected to the given cycle as Allan Goff: "Stems have only one possible collapse state"
         stems = {}
-        
-        # الخطوة 1: حدد المربعات التي ستستخدمها الدورة
+    #    step1 : identify all squares involved in the cycle
         cycle_squares = set()
         for move_id in cycle_moves:
             move = self._find_move(move_id)
             if move:
                 cycle_squares.update(move.squares)
-        
         logger.info(f"Cycle moves: {cycle_moves}")
         logger.info(f"Cycle squares: {cycle_squares}")
-        
-        # الخطوة 2: ابحث عن الحركات المتشابكة مع الدورة لكن ليست فيها
+
+        # step 2: check all moves to see if they are stems
         for move in self.game_state.moves:
-            # تخطي الحركات المنهارة أو الموجودة في الدورة
             if move.collapsed or move.move_id in cycle_moves:
-                continue
+                continue# skip collapsed moves and cycle moves
             
-            # شوف إذا هذه الحركة متشابكة مع أي حركة في الدورة
+            # check if this move shares squares with the cycle
             move_squares = set(move.squares)
             shared_with_cycle = move_squares & cycle_squares
             
             if shared_with_cycle:
-                # هذه الحركة stem! متشابكة مع الدورة
-                # المربع الوحيد المتاح = المربع اللي مو مشترك مع الدورة
-                available_squares = move_squares - cycle_squares
-                
+                # This move shares at least one square with the cycle
+                available_squares = move_squares - cycle_squares 
                 if len(available_squares) == 1:
-                    # حالة مثالية: مربع واحد فقط متاح
+            #    This is a stem - only one square available
                     forced_square = list(available_squares)[0]
                     stems[move.move_id] = forced_square
                     logger.info(f"Stem found: {move.move_id} must collapse to {forced_square}")
                 
                 elif len(available_squares) == 0:
-                    # كلا المربعين مشتركين مع الدورة!
-                    # هذه حالة معقدة - الـ stem سينهار حسب اختيار الدورة
+                #  Both squares are in the cycle - complex stem
+                #  We do NOT add it to stems because its collapse depends on cycle choice
                     logger.info(f"Complex stem: {move.move_id} has both squares in cycle")
-                    # لا نضيفها للـ stems لأن انهيارها يعتمد على اختيار الدورة
-                
                 else:
-                    # مربعين متاحين - مو stem حقيقي
+                #   Not a stem - multiple available squares
                     logger.info(f"Not a stem: {move.move_id} has {len(available_squares)} available squares")
-        
         return stems
     # ====================================
     # VALIDATION HELPERS
@@ -687,27 +681,18 @@ class QuantumTicTacToe:
         def backtrack(move_index, current_option, used_squares):
             
             #Recursive backtracking to find ALL valid collapse combinations
-            """
-            Args:
-                move_index: Current move we're assigning
-                current_option: Current partial assignment {move_id: square}
-                used_squares: Set of squares already used in this option
-            """
             # Base case: all moves assigned successfully
             if move_index == len(uncollapsed):
                 # Save this valid option
                 all_options.append(current_option.copy())
                 return
-            
             # Get current move
             move = uncollapsed[move_index]
-            
             # Try EACH square this move can collapse to
             for square in move.squares:
                 # Skip if this square is already used by another move
                 if square in used_squares:
                     continue
-                
                 # Assign this square to current move
                 current_option[move.move_id] = square
                 used_squares.add(square)

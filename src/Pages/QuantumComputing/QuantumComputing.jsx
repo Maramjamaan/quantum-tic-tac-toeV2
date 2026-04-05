@@ -251,7 +251,6 @@ const QuantumComputing = () => {
       <section className="qc-section qc-inside">
         <div className="qc-container">
           <h2 className="qc-section-title">{t('quantumComputing.inside.title')}</h2>
-          <p className="qc-section-subtitle">{t('quantumComputing.inside.subtitle')}</p>
           
           <div className="inside-comparison">
             {/* Cooling System */}

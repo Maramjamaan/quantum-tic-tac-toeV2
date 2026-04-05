@@ -4,6 +4,7 @@
  * This hook manages the entire game state and connects to the Python API.
  * 
  * ✅ UPDATED: Added xWinningLine and oWinningLine for simultaneous win display
+ * ✅ FIXED: Handle NOT_ENOUGH_SQUARES error and set game to DRAW
  */
 import { MIN_SQUARES_FOR_MOVE, COLLAPSE_DELAY } from '../constants/gameConstants';
 import { useState, useCallback, useEffect } from 'react';
@@ -17,6 +18,8 @@ import Logger from '../utils/logger';
 
 /**
  * Convert Python API response to board we can display
+ * 
+ * ✅ FIXED: Now correctly links classical squares with their move IDs
  */
 function buildBoardFromAPI(apiGameState) {
   const board = Array(9).fill().map(() => ({
@@ -25,15 +28,27 @@ function buildBoardFromAPI(apiGameState) {
     state: SQUARE_STATES.EMPTY
   }));
 
+  // Build a map of final_square -> move_id for collapsed moves
+  const collapsedMoveMap = {};
+  if (apiGameState.moves) {
+    apiGameState.moves.forEach(move => {
+      if (move.collapsed && move.final_square !== null && move.final_square !== undefined) {
+        collapsedMoveMap[move.final_square] = move.move_id;
+      }
+    });
+  }
+
   // First, mark all classical squares from the board
   if (apiGameState.board) {
     apiGameState.board.forEach((player, index) => {
       if (player !== null && player !== undefined) {
-        board[index].classicalMoveId = player;
+        // Use the actual move_id from collapsed moves, not just the player
+        const moveId = collapsedMoveMap[index] || player;
+        board[index].classicalMoveId = moveId;
         board[index].state = SQUARE_STATES.CLASSICAL;
         board[index].quantumMoveIds = [];
 
-        Logger.debug(`Square ${index}: Classical ${player}`);
+        Logger.debug(`Square ${index}: Classical ${moveId} (player: ${player})`);
       }
     });
   }
@@ -137,8 +152,8 @@ export const useGameState = () => {
           status: result.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
           winner: result.winner,
           winningLine: result.winning_line || [],
-          xWinningLine: result.x_winning_line || [],  // ✅ NEW
-          oWinningLine: result.o_winning_line || []   // ✅ NEW
+          xWinningLine: result.x_winning_line || [],
+          oWinningLine: result.o_winning_line || []
         }));
         
         // Update apiGameState with winner info
@@ -149,8 +164,8 @@ export const useGameState = () => {
           x_score: result.x_score,
           o_score: result.o_score,
           winning_line: result.winning_line,
-          x_winning_line: result.x_winning_line,  // ✅ NEW
-          o_winning_line: result.o_winning_line   // ✅ NEW
+          x_winning_line: result.x_winning_line,
+          o_winning_line: result.o_winning_line
         }));
         
         return true;
@@ -280,8 +295,37 @@ export const useGameState = () => {
         setSelectedSquares([]);
 
       } else {
+        // ✅ Handle specific error types from backend
         Logger.error('Move failed:', result.error);
-        setUserError(result.error || 'ERROR_MOVE_FAILURE');
+        
+        // Handle NOT_ENOUGH_SQUARES - game ends as draw (NO error banner!)
+        if (result.error === 'NOT_ENOUGH_SQUARES') {
+          Logger.info('🎮 Game ended - not enough squares for quantum move');
+          // ✅ Don't show error banner - just end the game as draw
+          // setUserError is NOT called here!
+          setGameState(prev => ({
+            ...prev,
+            status: GAME_STATUS.DRAW,
+            winner: null
+          }));
+        } 
+        // Handle IMPOSSIBLE_COLLAPSE - invalid move, don't end game
+        else if (result.error === 'IMPOSSIBLE_COLLAPSE') {
+          Logger.warn('⚠️ Impossible collapse - move rejected');
+          setUserError('ERROR_IMPOSSIBLE_COLLAPSE');
+        }
+        // Handle GAME_ALREADY_OVER
+        else if (result.error === 'GAME_ALREADY_OVER') {
+          Logger.info('🎮 Game already over');
+          setUserError('ERROR_GAME_ALREADY_OVER');
+          // Check winner to update UI
+          await checkWinner();
+        }
+        // Generic error
+        else {
+          setUserError(result.error || 'ERROR_MOVE_FAILURE');
+        }
+        
         setSelectedSquares([]);
       }
 
@@ -290,7 +334,7 @@ export const useGameState = () => {
       setUserError('ERROR_MOVE_FAILURE');
       setSelectedSquares([]);
     }
-  }, [api, board, checkGameEnd]);
+  }, [api, board, checkGameEnd, checkWinner]);
 
   /**
    * Handle when player clicks a square
@@ -364,8 +408,8 @@ export const useGameState = () => {
               status: winnerResult.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
               winner: winnerResult.winner,
               winningLine: winnerResult.winning_line || [],
-              xWinningLine: winnerResult.x_winning_line || [],  // ✅ NEW
-              oWinningLine: winnerResult.o_winning_line || [],  // ✅ NEW
+              xWinningLine: winnerResult.x_winning_line || [],
+              oWinningLine: winnerResult.o_winning_line || [],
               collapseOptions: [],
               pendingCycle: null
             }));
@@ -378,8 +422,8 @@ export const useGameState = () => {
               x_score: winnerResult.x_score,
               o_score: winnerResult.o_score,
               winning_line: winnerResult.winning_line,
-              x_winning_line: winnerResult.x_winning_line,  // ✅ NEW
-              o_winning_line: winnerResult.o_winning_line,  // ✅ NEW
+              x_winning_line: winnerResult.x_winning_line,
+              o_winning_line: winnerResult.o_winning_line,
               x_wins_count: winnerResult.x_wins_count,
               o_wins_count: winnerResult.o_wins_count
             }));
@@ -511,17 +555,50 @@ export const useGameState = () => {
         if (result && result.success && isMounted) {
           setApiGameState(result.game_state);
           
+          // ✅ FIRST: Check if not enough squares on load (before checking winner)
+          const emptySquares = result.game_state.board.filter(sq => sq === null).length;
+          if (emptySquares <= 2 && emptySquares > 0) {
+            // Check if there are any uncollapsed quantum moves
+            const hasQuantumMoves = result.game_state.moves?.some(m => !m.collapsed);
+            if (!hasQuantumMoves) {
+              Logger.info('Game loaded with not enough squares - setting to DRAW');
+              setGameState(prev => ({
+                ...prev,
+                status: GAME_STATUS.DRAW,
+                winner: null
+              }));
+              return; // Don't check winner, game is already a draw
+            }
+          }
+          
           // Check if there's already a winner on load
           const winnerCheck = await api.checkWinner();
-          if (winnerCheck && winnerCheck.success && winnerCheck.winner) {
-            setGameState(prev => ({
-              ...prev,
-              status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
-              winner: winnerCheck.winner,
-              winningLine: winnerCheck.winning_line || [],
-              xWinningLine: winnerCheck.x_winning_line || [],  // ✅ NEW
-              oWinningLine: winnerCheck.o_winning_line || []   // ✅ NEW
-            }));
+          if (winnerCheck && winnerCheck.success) {
+            if (winnerCheck.winner) {
+              setGameState(prev => ({
+                ...prev,
+                status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
+                winner: winnerCheck.winner,
+                winningLine: winnerCheck.winning_line || [],
+                xWinningLine: winnerCheck.x_winning_line || [],
+                oWinningLine: winnerCheck.o_winning_line || []
+              }));
+              
+              // Also update apiGameState for simultaneous win display
+              setApiGameState(prev => ({
+                ...prev,
+                winner: winnerCheck.winner,
+                is_simultaneous: winnerCheck.is_simultaneous,
+                x_score: winnerCheck.x_score,
+                o_score: winnerCheck.o_score
+              }));
+            } else if (winnerCheck.is_draw) {
+              setGameState(prev => ({
+                ...prev,
+                status: GAME_STATUS.DRAW,
+                winner: null
+              }));
+            }
           }
         }
       } catch (error) {
@@ -567,8 +644,8 @@ export const useGameState = () => {
     currentPlayer: apiGameState?.current_player || PLAYERS.X,
     winner: gameState.winner,
     winningLine: gameState.winningLine || [],
-    xWinningLine: gameState.xWinningLine || [],  // ✅ NEW
-    oWinningLine: gameState.oWinningLine || [],  // ✅ NEW
+    xWinningLine: gameState.xWinningLine || [],
+    oWinningLine: gameState.oWinningLine || [],
 
     // API status
     loading: api.loading,

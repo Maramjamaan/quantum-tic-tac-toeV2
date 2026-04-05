@@ -73,7 +73,7 @@
     },
     "draw": {
       "title": "Quantum Draw!",
-      "explanation": "The board is completely full without either player achieving three consecutive classical marks. All quantum uncertainties have been resolved, but the strategic balance between you was perfect! Amazing game from both sides."
+      "explanation": "Not enough squares remaining for a new quantum move. A quantum move requires at least two empty squares, and no winner has emerged yet. Great game from both sides!"
     },
     "controls": {
       "title": "Game Controls",
@@ -101,7 +101,10 @@
     "collapseFailure": "Failed to execute collapse. Try again",
     "resetFailure": "Failed to reset game. Try again",
     "noSquaresAvailable": "No squares available for quantum moves",
-    "genericError": "An unexpected error occurred"
+    "genericError": "An unexpected error occurred",
+    "notEnoughSquares": "Game over! Not enough squares remaining for a new quantum move",
+    "impossibleCollapse": "Cannot execute this move - it would create an impossible collapse situation",
+    "gameAlreadyOver": "The game has already ended!"
   },
   
   "home": {

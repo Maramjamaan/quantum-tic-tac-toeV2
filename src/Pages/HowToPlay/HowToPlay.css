@@ -1,7 +1,7 @@
 /* How to Play Page - Final Clean Version */
 
 .how-to-play-page {
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -91,10 +91,7 @@
   margin-bottom: 30px;
 }
 
-.htp-hero .scroll-indicator {
-  color: #06ffa5;
-  animation: htpBounce 2s infinite;
-}
+
 
 @keyframes htpBounce {
   0%, 100% { transform: translateY(0); }
@@ -138,8 +135,10 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
   line-height: 1.5;
-  margin: 15px 0 0 0;
+  margin: 0 auto;
   max-width: 220px;
+  text-overflow: clip;
+  
 }
 
 .vs-divider {
@@ -304,8 +303,9 @@
   color: rgba(255, 255, 255, 0.75);
   font-size: 1rem;
   line-height: 1.7;
-  margin-bottom: 30px;
+  margin-bottom: 0 auto;
   padding-left: 60px;
+  text-overflow: clip;
 }
 
 /* Illustration Box */
@@ -478,7 +478,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 40px;
+  gap: 50px;
   flex-wrap: wrap;
 }
 
@@ -523,7 +523,8 @@
 }
 
 .who-chooses {
-  text-align: center;
+  
+  margin: auto;
   padding: 15px 20px;
   background: rgba(255, 200, 0, 0.08);
   border: 1px solid rgba(255, 200, 0, 0.25);
@@ -604,19 +605,6 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-.option-result {
-  margin: 12px 0 0 0;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.collapse-option:first-child .option-result {
-  color: #06ffa5;
-}
-
-.collapse-option:last-child .option-result {
-  color: #ff6b6b;
-}
 
 .option-or {
   display: flex;
@@ -626,28 +614,7 @@
   font-weight: bold;
 }
 
-/* Best choice */
-.best-choice {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 15px 20px;
-  background: rgba(6, 255, 165, 0.08);
-  border: 1px solid rgba(6, 255, 165, 0.25);
-  border-radius: 10px;
-}
 
-.best-choice svg {
-  color: #06ffa5;
-  flex-shrink: 0;
-}
-
-.best-choice p {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.9rem;
-  margin: 0;
-}
 
 /* ==================== WINNING ==================== */
 .winning-container {
@@ -724,12 +691,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin: auto;
 }
 
 .move-num {
   font-size: 1.6rem;
   font-weight: bold;
+  margin: auto;
 }
 
 .move-num.x { color: #06ffa5; }

@@ -42,9 +42,7 @@ const HowToPlay = () => {
           </div>
           <h1>{t('howToPlay.hero.title')}</h1>
           <p className="hero-subtitle">{t('howToPlay.hero.subtitle')}</p>
-          <div className="scroll-indicator">
-            <ChevronDown size={28} />
-          </div>
+         
         </div>
       </section>
 
@@ -284,7 +282,7 @@ const HowToPlay = () => {
       <section className="htp-section htp-rule alt-bg">
         <div className="htp-container">
           <div className="rule-header">
-            <span className="rule-number">4</span>
+            <span className="rule-number" >4</span>
             <h2>{t('howToPlay.rules.rule4.title')}</h2>
           </div>
           <p className="rule-desc">{t('howToPlay.rules.rule4.desc')}</p>
@@ -306,10 +304,10 @@ const HowToPlay = () => {
                 <div className="collapse-option">
                   <h4>{t('howToPlay.rules.rule4.option')} 1</h4>
                   <p className="option-choice">
-                    {isRTL ? 'اختر: X₁ ← مربع 2' : 'Choose: X₁ → Square 2'}
+                    {isRTL ? 'اختر: O₂ ← مربع 5' : 'Choose: O₂ → Square 5'}
                   </p>
                   <div className="htp-board small">
-                    <div className="htp-cell"></div>
+                    <div className="htp-cell classical-x">X</div>
                     <div className="htp-cell classical-x">X</div>
                     <div className="htp-cell"></div>
                     <div className="htp-cell"></div>
@@ -338,7 +336,6 @@ const HowToPlay = () => {
                       </>
                     )}
                   </div>
-                  <p className="option-result">O {t('howToPlay.rules.rule4.getsCenter')} ✓</p>
                 </div>
 
                 {/* OR */}
@@ -348,7 +345,7 @@ const HowToPlay = () => {
                 <div className="collapse-option">
                   <h4>{t('howToPlay.rules.rule4.option')} 2</h4>
                   <p className="option-choice">
-                    {isRTL ? 'اختر: X₁ ← مربع 1' : 'Choose: X₁ → Square 1'}
+                    {isRTL ? 'اختر: O₂ ← مربع 2' : 'Choose: O₂ → Square 2'}
                   </p>
                   <div className="htp-board small">
                     <div className="htp-cell classical-x">X</div>
@@ -380,14 +377,7 @@ const HowToPlay = () => {
                       </>
                     )}
                   </div>
-                  <p className="option-result">X {t('howToPlay.rules.rule4.getsCenter')} ✗</p>
                 </div>
-              </div>
-
-              {/* Best choice */}
-              <div className="best-choice">
-                <Lightbulb size={18} />
-                <p>{t('howToPlay.rules.rule4.bestChoice')}</p>
               </div>
             </div>
           </div>
@@ -439,12 +429,12 @@ const HowToPlay = () => {
             
             <div className="special-illustration">
               <div className="htp-board small">
-                <div className="htp-cell win-x">X<sub>3</sub></div>
-                <div className="htp-cell win-x">X<sub>3</sub></div>
-                <div className="htp-cell win-x">X<sub>3</sub></div>
-                <div className="htp-cell win-o">O<sub>4</sub></div>
-                <div className="htp-cell win-o">O<sub>4</sub></div>
-                <div className="htp-cell win-o">O<sub>4</sub></div>
+                <div className="htp-cell win-x">X</div>
+                <div className="htp-cell win-x">X</div>
+                <div className="htp-cell win-x">X</div>
+                <div className="htp-cell win-o">O</div>
+                <div className="htp-cell win-o">O</div>
+                <div className="htp-cell win-o">O</div>
                 <div className="htp-cell"></div>
                 <div className="htp-cell"></div>
                 <div className="htp-cell"></div>
@@ -452,13 +442,13 @@ const HowToPlay = () => {
               
               <div className="special-result">
                 <div className="result-comparison">
-                  <span className="move-num x">X₃</span>
+                  <span className="move-num x">X</span>
                   <span className="vs">vs</span>
-                  <span className="move-num o">O₄</span>
+                  <span className="move-num o">O</span>
                 </div>
                 <div className="result-arrow">↓</div>
                 <div className="result-winner">
-                  <span>3 &lt; 4</span>
+                  <span>5 &lt; 4</span>
                   <div className="winner-badge">
                     <Trophy size={18} />
                     {t('howToPlay.special.xWins')}

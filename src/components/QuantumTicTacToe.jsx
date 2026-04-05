@@ -220,15 +220,24 @@ const QuantumTicTacToe = () => {
   const gameHook = useGameState();
   const { t } = useLanguage();
 
+  // ✅ UPDATED: Added new error mappings
   const getErrorMessage = (errorCode) => {
     const errorMap = {
       'ERROR_SERVER_DOWN': t('errors.serverDown'),
       'ERROR_MOVE_FAILURE': t('errors.moveFailure'),
       'ERROR_COLLAPSE_FAILURE': t('errors.collapseFailure'),
       'ERROR_RESET_FAILURE': t('errors.resetFailure'),
-      'ERROR_NO_SQUARES': t('errors.noSquaresAvailable')
+      'ERROR_NO_SQUARES': t('errors.noSquaresAvailable'),
+      // ✅ NEW error types
+      'ERROR_NOT_ENOUGH_SQUARES': t('errors.notEnoughSquares'),
+      'ERROR_IMPOSSIBLE_COLLAPSE': t('errors.impossibleCollapse'),
+      'ERROR_GAME_ALREADY_OVER': t('errors.gameAlreadyOver'),
+      // Handle raw backend errors too
+      'NOT_ENOUGH_SQUARES': t('errors.notEnoughSquares'),
+      'IMPOSSIBLE_COLLAPSE': t('errors.impossibleCollapse'),
+      'GAME_ALREADY_OVER': t('errors.gameAlreadyOver')
     };
-    return errorMap[errorCode] || errorCode;
+    return errorMap[errorCode] || t('errors.genericError');
   };
 
   return (
