@@ -53,9 +53,9 @@ const QuantumComputing = () => {
       {/* Hero Section */}
       <section className="qc-hero">
         <div className="qc-hero-content">
-        <div className="qc-hero-icon">
-          <QuantumLogo size={180} />
-        </div>
+       <div className="qc-hero-icon">
+  <QuantumLogo size={180} />
+</div>
           <h1 className="qc-hero-title">{t('quantumComputing.hero.title')}</h1>
           <p className="qc-hero-subtitle">{t('quantumComputing.hero.subtitle')}</p>
         </div>
