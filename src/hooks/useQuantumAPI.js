@@ -1,3 +1,4 @@
+//  Handles all HTTP requests to Python backend.
 // importing necessary modules
 import { useState } from 'react';
 import config from '../config';

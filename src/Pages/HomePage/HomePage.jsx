@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Navbar from '../../Navbar/Navbar';
 import Footer from '../../Footer/Footer';
+import QuantumLogo from '../../components/QuantumLogo'
 import './HomePage.css';
 
 const HomePage = () => {
@@ -29,18 +30,7 @@ const HomePage = () => {
       {/* Main Content */}
       <div className="home-content">
         {/* Quantum Atom Animation */}
-        <div className="quantum-atom">
-          <div className="nucleus"></div>
-          <div className="orbit orbit-1">
-            <div className="electron"></div>
-          </div>
-          <div className="orbit orbit-2">
-            <div className="electron"></div>
-          </div>
-          <div className="orbit orbit-3">
-            <div className="electron"></div>
-          </div>
-        </div>
+        <QuantumLogo size={260} />
 
         {/* Title */}
         <h1 className="home-title">

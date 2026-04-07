@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import QuantumLogo from '../components/QuantumLogo';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -33,7 +34,7 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <div className="navbar-logo" onClick={() => handleNavigation('/')}>
-          <span className="logo-icon">Q</span>
+          <QuantumLogo size={45} />
           <span className="logo-text">{t('title')}</span>
         </div>
 

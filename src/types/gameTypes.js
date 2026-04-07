@@ -33,8 +33,9 @@ export const GAME_STATUS = {
 
 // SQUARE STATES
 export const SQUARE_STATES = {
-  QUANTUM: 'quantum', // contains quantum moves
-  CLASSICAL: 'classical', // one move after collapse 
+  EMPTY: 'empty',
+  QUANTUM: 'quantum',
+  CLASSICAL: 'classical',
 };
 
 // Quantum move class 

@@ -1,8 +1,7 @@
 """
 FastAPI Backend for Quantum Tic-Tac-Toe
 Connects React frontend to quantum game engine
-
-✅ UPDATED: Now returns x_winning_line and o_winning_line for simultaneous wins
+ Now returns x_winning_line and o_winning_line for simultaneous wins
 """
 
 from fastapi import FastAPI, HTTPException

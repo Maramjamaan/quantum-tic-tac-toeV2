@@ -10,14 +10,14 @@ import ControlPanel from './ControlPanel/ControlPanel';
 import Logger from '../utils/logger';
 
 
-// ✅ Square Component - UPDATED with dual winning lines
+// Square Component
 const Square = memo(({ 
   index, 
   square, 
   isSelected, 
   isWinning,
-  isXWinning,    // ✅ NEW: Is this square in X's winning line?
-  isOWinning,    // ✅ NEW: Is this square in O's winning line?
+  isXWinning,    
+  isOWinning,   
   isPlaying, 
   onSquareClick 
 }) => {
@@ -25,7 +25,7 @@ const Square = memo(({
     let classes = ['square'];
     if (isSelected) classes.push('selected');
     
-    // ✅ UPDATED: Different classes for X and O winning lines
+    //  Different classes for X and O winning lines
     if (isXWinning && isOWinning) {
       // Square is in BOTH winning lines (rare but possible)
       classes.push('winning', 'winning-both');
@@ -91,15 +91,15 @@ const Square = memo(({
     prevProps.square === nextProps.square &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.isWinning === nextProps.isWinning &&
-    prevProps.isXWinning === nextProps.isXWinning &&  // ✅ NEW
-    prevProps.isOWinning === nextProps.isOWinning &&  // ✅ NEW
+    prevProps.isXWinning === nextProps.isXWinning && 
+    prevProps.isOWinning === nextProps.isOWinning && 
     prevProps.isPlaying === nextProps.isPlaying
   );
 });
 
 Square.displayName = 'Square';
 
-// ✅ Compact Collapse Options Component (inline)
+// Compact Collapse Options Component (inline)
 const CollapseOptionsCompact = ({ gameState, apiGameState, chooseCollapse, t }) => {
   const options = gameState.collapseOptions || apiGameState?.collapseOptions || [];
 
@@ -144,7 +144,7 @@ const CollapseOptionsCompact = ({ gameState, apiGameState, chooseCollapse, t }) 
   );
 };
 
-// ✅ GameBoard Component - UPDATED with dual winning lines
+// GameBoard Component 
 const GameBoard = ({
   board,
   selectedSquares,
@@ -152,8 +152,8 @@ const GameBoard = ({
   currentPlayer,
   isPlaying,
   winningLine,
-  xWinningLine = [],  // ✅ NEW: X's winning line
-  oWinningLine = [],  // ✅ NEW: O's winning line
+  xWinningLine = [],  
+  oWinningLine = [], 
   // Collapse props
   isWaitingCollapse,
   gameState,
@@ -220,7 +220,7 @@ const QuantumTicTacToe = () => {
   const gameHook = useGameState();
   const { t } = useLanguage();
 
-  // ✅ UPDATED: Added new error mappings
+  // Added new error mappings
   const getErrorMessage = (errorCode) => {
     const errorMap = {
       'ERROR_SERVER_DOWN': t('errors.serverDown'),
@@ -228,11 +228,9 @@ const QuantumTicTacToe = () => {
       'ERROR_COLLAPSE_FAILURE': t('errors.collapseFailure'),
       'ERROR_RESET_FAILURE': t('errors.resetFailure'),
       'ERROR_NO_SQUARES': t('errors.noSquaresAvailable'),
-      // ✅ NEW error types
       'ERROR_NOT_ENOUGH_SQUARES': t('errors.notEnoughSquares'),
       'ERROR_IMPOSSIBLE_COLLAPSE': t('errors.impossibleCollapse'),
       'ERROR_GAME_ALREADY_OVER': t('errors.gameAlreadyOver'),
-      // Handle raw backend errors too
       'NOT_ENOUGH_SQUARES': t('errors.notEnoughSquares'),
       'IMPOSSIBLE_COLLAPSE': t('errors.impossibleCollapse'),
       'GAME_ALREADY_OVER': t('errors.gameAlreadyOver')
@@ -291,8 +289,8 @@ const QuantumTicTacToe = () => {
               currentPlayer={gameHook.currentPlayer}
               isPlaying={gameHook.isPlaying}
               winningLine={gameHook.winningLine}
-              xWinningLine={gameHook.xWinningLine}  // ✅ NEW
-              oWinningLine={gameHook.oWinningLine}  // ✅ NEW
+              xWinningLine={gameHook.xWinningLine} 
+              oWinningLine={gameHook.oWinningLine}  
               isWaitingCollapse={gameHook.isWaitingCollapse}
               gameState={gameHook.gameState}
               apiGameState={gameHook.apiGameState}

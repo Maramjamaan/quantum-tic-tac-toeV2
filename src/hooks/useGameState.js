@@ -2,9 +2,7 @@
  * useGameState Hook - Main Game Logic
  * ====================================
  * This hook manages the entire game state and connects to the Python API.
- * 
- * ✅ UPDATED: Added xWinningLine and oWinningLine for simultaneous win display
- * ✅ FIXED: Handle NOT_ENOUGH_SQUARES error and set game to DRAW
+ * Central state management connecting UI to API.
  */
 import { MIN_SQUARES_FOR_MOVE, COLLAPSE_DELAY } from '../constants/gameConstants';
 import { useState, useCallback, useEffect } from 'react';
@@ -18,8 +16,6 @@ import Logger from '../utils/logger';
 
 /**
  * Convert Python API response to board we can display
- * 
- * ✅ FIXED: Now correctly links classical squares with their move IDs
  */
 function buildBoardFromAPI(apiGameState) {
   const board = Array(9).fill().map(() => ({
@@ -141,7 +137,7 @@ export const useGameState = () => {
       Logger.info('Winner check result:', result);
       
       if (result.winner) {
-        Logger.info('🏆 Winner detected:', result.winner);
+        Logger.info('Winner detected:', result.winner);
         Logger.info('Winning line:', result.winning_line);
         Logger.info('Is simultaneous:', result.is_simultaneous);
         Logger.info('X winning line:', result.x_winning_line);
@@ -170,7 +166,7 @@ export const useGameState = () => {
         
         return true;
       } else if (result.is_draw) {
-        Logger.info('🤝 Draw detected!');
+        Logger.info(' Draw detected!');
 
         setGameState(prev => ({
           ...prev,
@@ -250,7 +246,7 @@ export const useGameState = () => {
         setApiGameState(result.game_state);
 
         if (result.cycle_detected) {
-          Logger.info('🌀 Cycle detected!');
+          Logger.info('Cycle detected!');
           Logger.info('Cycle creator:', result.cycle_creator);
           Logger.info('Collapse chooser:', result.collapse_chooser);
 
@@ -295,13 +291,13 @@ export const useGameState = () => {
         setSelectedSquares([]);
 
       } else {
-        // ✅ Handle specific error types from backend
+        // Handle specific error types from backend
         Logger.error('Move failed:', result.error);
         
         // Handle NOT_ENOUGH_SQUARES - game ends as draw (NO error banner!)
         if (result.error === 'NOT_ENOUGH_SQUARES') {
-          Logger.info('🎮 Game ended - not enough squares for quantum move');
-          // ✅ Don't show error banner - just end the game as draw
+          Logger.info(' Game ended - not enough squares for quantum move');
+          // Don't show error banner - just end the game as draw
           // setUserError is NOT called here!
           setGameState(prev => ({
             ...prev,
@@ -311,12 +307,12 @@ export const useGameState = () => {
         } 
         // Handle IMPOSSIBLE_COLLAPSE - invalid move, don't end game
         else if (result.error === 'IMPOSSIBLE_COLLAPSE') {
-          Logger.warn('⚠️ Impossible collapse - move rejected');
+          Logger.warn('Impossible collapse - move rejected');
           setUserError('ERROR_IMPOSSIBLE_COLLAPSE');
         }
         // Handle GAME_ALREADY_OVER
         else if (result.error === 'GAME_ALREADY_OVER') {
-          Logger.info('🎮 Game already over');
+          Logger.info('Game already over');
           setUserError('ERROR_GAME_ALREADY_OVER');
           // Check winner to update UI
           await checkWinner();
@@ -385,7 +381,7 @@ export const useGameState = () => {
       }
 
       if (result && result.success) {
-        Logger.success('✅ Collapse successful:', result.collapse_results);
+        Logger.success('Collapse successful:', result.collapse_results);
 
         // Step 1: Update the board state immediately
         setApiGameState(result.game_state);
@@ -396,7 +392,7 @@ export const useGameState = () => {
 
         if (winnerResult && winnerResult.success) {
           if (winnerResult.winner) {
-            Logger.info('🏆 Winner after collapse:', winnerResult.winner);
+            Logger.info('Winner after collapse:', winnerResult.winner);
             Logger.info('Is simultaneous:', winnerResult.is_simultaneous);
             Logger.info('X score:', winnerResult.x_score);
             Logger.info('O score:', winnerResult.o_score);
@@ -432,7 +428,7 @@ export const useGameState = () => {
           }
 
           if (winnerResult.is_draw) {
-            Logger.info('🤝 Draw after collapse');
+            Logger.info('Draw after collapse');
 
             setGameState(prev => ({
               ...prev,
@@ -555,7 +551,7 @@ export const useGameState = () => {
         if (result && result.success && isMounted) {
           setApiGameState(result.game_state);
           
-          // ✅ FIRST: Check if not enough squares on load (before checking winner)
+          // FIRST: Check if not enough squares on load (before checking winner)
           const emptySquares = result.game_state.board.filter(sq => sq === null).length;
           if (emptySquares <= 2 && emptySquares > 0) {
             // Check if there are any uncollapsed quantum moves

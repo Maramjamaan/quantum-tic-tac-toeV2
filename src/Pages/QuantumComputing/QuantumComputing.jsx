@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Navbar from '../../Navbar/Navbar';
 import Footer from '../../Footer/Footer';
-import { 
-  Atom, 
-  Link, 
-  Eye, 
-  Monitor, 
-  Pill, 
-  Lock, 
-  TrendingUp, 
-  Truck, 
+import QuantumLogo from '../../components/QuantumLogo';
+import {
+  Atom,
+  Link,
+  Eye,
+  Monitor,
+  Pill,
+  Lock,
+  TrendingUp,
+  Truck,
   Gamepad2,
   ChevronDown,
   ArrowRight,
@@ -53,19 +54,11 @@ const QuantumComputing = () => {
       {/* Hero Section */}
       <section className="qc-hero">
         <div className="qc-hero-content">
-          <div className="qc-hero-icon">
-            <div className="atom-icon">
-              <div className="atom-nucleus"></div>
-              <div className="atom-orbit atom-orbit-1"><div className="atom-electron"></div></div>
-              <div className="atom-orbit atom-orbit-2"><div className="atom-electron"></div></div>
-            </div>
-          </div>
+        
           <h1 className="qc-hero-title">{t('quantumComputing.hero.title')}</h1>
           <p className="qc-hero-subtitle">{t('quantumComputing.hero.subtitle')}</p>
         </div>
-        <div className="scroll-indicator">
-          <ChevronDown size={32} />
-        </div>
+        
       </section>
 
       {/* What is Quantum Computing */}
@@ -144,24 +137,24 @@ const QuantumComputing = () => {
       <section className="qc-section qc-principles">
         <div className="qc-container">
           <h2 className="qc-section-title">{t('quantumComputing.principles.title')}</h2>
-          
+
           {/* Tabs */}
           <div className="principles-tabs">
-            <button 
+            <button
               className={`principle-tab ${activeTab === 'superposition' ? 'active' : ''}`}
               onClick={() => setActiveTab('superposition')}
             >
               <Sparkles size={20} className="tab-icon" />
               <span className="tab-label">{t('quantumComputing.principles.superposition.title')}</span>
             </button>
-            <button 
+            <button
               className={`principle-tab ${activeTab === 'entanglement' ? 'active' : ''}`}
               onClick={() => setActiveTab('entanglement')}
             >
               <Link size={20} className="tab-icon" />
               <span className="tab-label">{t('quantumComputing.principles.entanglement.title')}</span>
             </button>
-            <button 
+            <button
               className={`principle-tab ${activeTab === 'measurement' ? 'active' : ''}`}
               onClick={() => setActiveTab('measurement')}
             >
@@ -251,7 +244,7 @@ const QuantumComputing = () => {
       <section className="qc-section qc-inside">
         <div className="qc-container">
           <h2 className="qc-section-title">{t('quantumComputing.inside.title')}</h2>
-          
+
           <div className="inside-comparison">
             {/* Cooling System */}
             <div className="inside-card cooling">
@@ -345,7 +338,7 @@ const QuantumComputing = () => {
           <div className="cta-content">
             <h2>{t('quantumComputing.cta.title')}</h2>
             <p>{t('quantumComputing.cta.description')}</p>
-            <button 
+            <button
               className="cta-button"
               onClick={() => navigate('/game')}
             >

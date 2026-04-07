@@ -54,31 +54,44 @@ body {
 }
 
 /* Animated Particles Background - Same as Home */
-body::before {
-  content: '';
+
+.particles-bg {
   position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(3px 3px at 20% 30%, #06ffa5, transparent),
-    radial-gradient(3px 3px at 60% 70%, #a855f7, transparent),
-    radial-gradient(2px 2px at 50% 50%, #3b82f6, transparent),
-    radial-gradient(2px 2px at 80% 10%, #06ffa5, transparent),
-    radial-gradient(3px 3px at 90% 60%, #a855f7, transparent),
-    radial-gradient(2px 2px at 33% 80%, #3b82f6, transparent);
-  background-size: 200% 200%;
-  animation: particles-float 20s ease-in-out infinite;
-  opacity: 0.3;
   pointer-events: none;
   z-index: 0;
 }
 
-@keyframes particles-float {
-  0%, 100% { background-position: 0% 0%; opacity: 0.3; }
-  50% { background-position: 100% 100%; opacity: 0.5; }
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #06ffa5;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float-particle 5s ease-in-out infinite;
 }
+
+.particle:nth-child(odd) {
+  background: #a855f7;
+}
+
+.particle:nth-child(3n) {
+  background: #3b82f6;
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-30px) translateX(10px);
+    opacity: 0.6;
+  }
+}
+
 
 /* ============================================
    MAIN APP CONTAINER

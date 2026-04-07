@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import './Footer.css';
 
+
 const Footer = () => {
   const { language } = useLanguage();
 

@@ -1,18 +1,17 @@
-/* ==========================================
-   QUANTUM COMPUTING PAGE
-   ========================================== */
-
+/*=========================================
+   QUANTUM COMPUTING PAGE - Unified Design
+   ========================================== */ 
+ 
 .quantum-computing-page {
   min-height: 100vh;
-  background:linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
   position: relative;
   overflow-x: hidden;
 }
-
+ 
 /* ==========================================
    PARTICLES BACKGROUND
    ========================================== */
-
 .particles-bg {
   position: fixed;
   width: 100%;
@@ -20,7 +19,7 @@
   pointer-events: none;
   z-index: 0;
 }
-
+ 
 .particle {
   position: absolute;
   width: 6px;
@@ -30,41 +29,29 @@
   opacity: 0.3;
   animation: float-particle 5s ease-in-out infinite;
 }
-
-.particle:nth-child(odd) {
-  background: #a855f7;
-}
-
-.particle:nth-child(3n) {
-  background: #3b82f6;
-}
-
+ 
+.particle:nth-child(odd) { background: #a855f7; }
+.particle:nth-child(3n) { background: #3b82f6; }
+ 
 @keyframes float-particle {
-  0%, 100% {
-    transform: translateY(0) translateX(0);
-    opacity: 0.3;
-  }
-  50% {
-    transform: translateY(-30px) translateX(10px);
-    opacity: 0.6;
-  }
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+  50% { transform: translateY(-30px) translateX(10px); opacity: 0.6; }
 }
-
+ 
 /* ==========================================
    COMMON STYLES
    ========================================== */
-
 .qc-section {
   position: relative;
   z-index: 1;
   padding: 80px 20px;
 }
-
+ 
 .qc-container {
   max-width: 1200px;
   margin: 0 auto;
 }
-
+ 
 .qc-section-title {
   font-size: 2.5rem;
   font-weight: 800;
@@ -73,13 +60,12 @@
   color: #fff;
   text-shadow: 0 0 20px rgba(6, 255, 165, 0.3);
 }
-
+ 
 /* ==========================================
    HERO SECTION
    ========================================== */
-
 .qc-hero {
-  min-height: 100vh;
+  min-height: 45vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -89,18 +75,19 @@
   position: relative;
   z-index: 1;
 }
-
+ 
 .qc-hero-content {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+ 
 
 .qc-hero-icon {
   margin-bottom: 30px;
 }
 
-/* Atom Icon Animation */
+/* Atom Icon Animation
 .atom-icon {
   width: 120px;
   height: 120px;
@@ -162,13 +149,13 @@
 @keyframes rotate-orbit {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(360deg); }
-}
+} */
 
 .qc-hero-title {
   font-size: 3.5rem;
   font-weight: 800;
   color: #06ffa5;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
   text-shadow: 0 0 30px rgba(6, 255, 165, 0.5);
 }
 
@@ -178,17 +165,7 @@
   max-width: 500px;
 }
 
-.scroll-indicator {
-  position: absolute;
-  bottom: 40px;
-  animation: bounce 2s ease-in-out infinite;
-  color: rgba(6, 255, 165, 0.6);
-}
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(15px); }
-}
 
 /* ==========================================
    WHAT IS QUANTUM COMPUTING

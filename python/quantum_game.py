@@ -167,7 +167,7 @@ class QuantumTicTacToe:
                 'game_state': self.game_state.to_dict()
             }
         
-        # ✅ NEW STEP: Check if only 2 or fewer empty squares remain
+        #  Check if only 2 or fewer empty squares remain
         empty_squares = [i for i, sq in enumerate(self.game_state.board) if sq is None]
         
         if len(empty_squares) <= 2:
@@ -221,11 +221,11 @@ class QuantumTicTacToe:
         # STEP 6: If cycle detected, generate collapse options
         collapse_options = []
         if cycle_detected:
-            # ← MODIFIED: Pass cycle_move_ids to generate options for this cycle only
+            # Pass cycle_move_ids to generate options for this cycle only
             collapse_options = self.generate_collapse_options(max_options=3, cycle_moves=cycle_move_ids)
             logger.info(f"Generated {len(collapse_options)} collapse options")
             
-            # ✅ NEW: If no valid collapse options, this is an impossible state
+            # If no valid collapse options, this is an impossible state
             if len(collapse_options) == 0:
                 logger.warning("Cycle detected but no valid collapse options - impossible state!")
                 # Remove the move we just added since it creates an impossible state
@@ -497,14 +497,9 @@ class QuantumTicTacToe:
     
     
     def _find_all_separate_cycles(self) -> List[List[str]]:
-        """
-        كشف جميع الدورات المنفصلة على اللوحة
         
-        Returns:
-            List of cycles, each cycle is a List[str] of move_ids
-            مثال: [['X1','X2','X3'], ['O1','O2']]
-        """
-        # بناء الغراف
+        # كشف جميع الدورات المنفصلة على اللوحة
+        
         graph = {}
         
         for ent in self.game_state.entanglements:
@@ -614,9 +609,6 @@ class QuantumTicTacToe:
         - Squares must be different
         - Squares must not have classical moves already
         
-        Note: Allan Goff's paper (Figures 9, 20, 21) shows that multiple quantum 
-        moves CAN share the same squares. There is no hard limit on the number 
-        of quantum moves per square.
         """
         # Check if squares are in valid range
         if not (0 <= square1 <= 8 and 0 <= square2 <= 8):
@@ -644,7 +636,7 @@ class QuantumTicTacToe:
     
 
     # DIVERSE COLLAPSE OPTIONS GENERATION
-    #  Added cycle_moves parameter to generate options for specific cycle only
+
     def generate_collapse_options(self, max_options=5, cycle_moves=None):
        
         #Generate ALL valid collapse options with MAXIMUM DIVERSITY
