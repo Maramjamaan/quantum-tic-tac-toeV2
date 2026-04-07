@@ -31,7 +31,7 @@ import quantumComputerMainImg from '../../assets/images/quantum-computer-main.jp
 
 const QuantumComputing = () => {
   const navigate = useNavigate();
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('superposition');
 
   return (
