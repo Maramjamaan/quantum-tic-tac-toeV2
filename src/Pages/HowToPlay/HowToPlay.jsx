@@ -3,15 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Navbar from '../../Navbar/Navbar';
 import Footer from '../../Footer/Footer';
-import { 
-  Gamepad2,
-  ChevronDown,
-  ArrowRight,
-  Zap,
-  Trophy,
-  AlertCircle,
-  Lightbulb
-} from 'lucide-react';
 import './HowToPlay.css';
 
 const HowToPlay = () => {
