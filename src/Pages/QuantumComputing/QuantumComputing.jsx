@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Truck,
   Gamepad2,
-  ChevronDown,
   ArrowRight,
   Zap,
   Sparkles,
@@ -54,7 +53,7 @@ const QuantumComputing = () => {
       {/* Hero Section */}
       <section className="qc-hero">
         <div className="qc-hero-content">
-        
+        <QuantumLogo size={120} />
           <h1 className="qc-hero-title">{t('quantumComputing.hero.title')}</h1>
           <p className="qc-hero-subtitle">{t('quantumComputing.hero.subtitle')}</p>
         </div>
