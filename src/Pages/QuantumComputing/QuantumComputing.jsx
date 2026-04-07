@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Truck,
   Gamepad2,
-  ChevronDown,
   ArrowRight,
   Zap,
   Sparkles,
