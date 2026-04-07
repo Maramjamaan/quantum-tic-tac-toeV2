@@ -3,6 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Navbar from '../../Navbar/Navbar';
 import Footer from '../../Footer/Footer';
+import {
+  Atom,
+  Link,
+  Eye,
+  Monitor,
+  Pill,
+  Lock,
+  TrendingUp,
+  Truck,
+  Gamepad2,
+  ArrowRight,
+  Zap,
+  Sparkles,
+  Snowflake,
+  Microchip,
+  Lightbulb
+} from 'lucide-react';
 import './HowToPlay.css';
 
 const HowToPlay = () => {
