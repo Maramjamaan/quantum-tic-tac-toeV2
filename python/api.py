@@ -28,9 +28,8 @@ app = FastAPI(
 # Enable CORS so React can talk to this API
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS", 
-    "http://localhost:3000,http://localhost:3001"
+    "http://localhost:3000,http://localhost:3001,https://q-tic-tac-toe.vercel.app"
 ).split(",")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,  
