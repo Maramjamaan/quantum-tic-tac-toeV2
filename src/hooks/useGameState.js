@@ -10,8 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { PLAYERS, GAME_STATUS, SQUARE_STATES, createGameState } from '../types/gameTypes.js';
 import { useQuantumAPI } from './useQuantumAPI.js';
 import Logger from '../utils/logger';
-import config from '../config';
-
+import config from '../config'; 
 // ==========================================
 // HELPER FUNCTIONS
 // ==========================================
@@ -548,61 +547,60 @@ export const useGameState = () => {
   let isMounted = true;
 
   const initSession = async () => {
-    try {
-      let sessionId = sessionStorage.getItem('quantum_session_id');
+  try {
+    let sessionId = sessionStorage.getItem('quantum_session_id');
 
-      if (!sessionId) {
-        // جلسة جديدة
-        const res = await fetch(`${config.apiUrl}/game/new`, { method: 'POST' });
-        const data = await res.json();
-        sessionId = data.session_id;
-        sessionStorage.setItem('quantum_session_id', sessionId);
-        if (isMounted) {
-          setApiGameState(data.game_state);
-        }
+    if (!sessionId) {
+      const res = await fetch(`${config.apiUrl}/game/new`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to create session');
+      const data = await res.json();
+      sessionId = data.session_id;
+      sessionStorage.setItem('quantum_session_id', sessionId);
+      if (isMounted) setApiGameState(data.game_state);
+      return;
+    }
+
+    const result = await api.getGameState();
+    if (!result || !result.success || !isMounted) return;
+
+    setApiGameState(result.game_state);
+
+    const emptySquares = result.game_state.board.filter(sq => sq === null).length;
+    if (emptySquares <= 2 && emptySquares > 0) {
+      const hasQuantumMoves = result.game_state.moves?.some(m => !m.collapsed);
+      if (!hasQuantumMoves) {
+        setGameState(prev => ({ ...prev, status: GAME_STATUS.DRAW, winner: null }));
         return;
       }
-
-      // جلسة موجودة — حمّل حالتها
-      const result = await api.getGameState();
-      if (result && result.success && isMounted) {
-        setApiGameState(result.game_state);
-
-        const emptySquares = result.game_state.board.filter(sq => sq === null).length;
-        if (emptySquares <= 2 && emptySquares > 0) {
-          const hasQuantumMoves = result.game_state.moves?.some(m => !m.collapsed);
-          if (!hasQuantumMoves) {
-            setGameState(prev => ({ ...prev, status: GAME_STATUS.DRAW, winner: null }));
-            return;
-          }
-        }
-
-        const winnerCheck = await api.checkWinner();
-        if (winnerCheck && winnerCheck.success) {
-          if (winnerCheck.winner) {
-            setGameState(prev => ({
-              ...prev,
-              status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
-              winner: winnerCheck.winner,
-              winningLine: winnerCheck.winning_line || [],
-              xWinningLine: winnerCheck.x_winning_line || [],
-              oWinningLine: winnerCheck.o_winning_line || []
-            }));
-            setApiGameState(prev => ({
-              ...prev,
-              winner: winnerCheck.winner,
-              is_simultaneous: winnerCheck.is_simultaneous,
-              x_score: winnerCheck.x_score,
-              o_score: winnerCheck.o_score
-            }));
-          } else if (winnerCheck.is_draw) {
-            setGameState(prev => ({ ...prev, status: GAME_STATUS.DRAW, winner: null }));
-          }
-        }
-      }
-    } catch (error) {
-      Logger.error('Failed to init session:', error);
     }
+
+    const winnerCheck = await api.checkWinner();
+    if (!winnerCheck || !winnerCheck.success) return;
+
+    if (winnerCheck.winner) {
+      setGameState(prev => ({
+        ...prev,
+        status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
+        winner: winnerCheck.winner,
+        winningLine: winnerCheck.winning_line || [],
+        xWinningLine: winnerCheck.x_winning_line || [],
+        oWinningLine: winnerCheck.o_winning_line || []
+      }));
+      setApiGameState(prev => ({
+        ...prev,
+        winner: winnerCheck.winner,
+        is_simultaneous: winnerCheck.is_simultaneous,
+        x_score: winnerCheck.x_score,
+        o_score: winnerCheck.o_score
+      }));
+    } else if (winnerCheck.is_draw) {
+      setGameState(prev => ({ ...prev, status: GAME_STATUS.DRAW, winner: null }));
+    }
+
+  } catch (error) {
+    Logger.error('Failed to init session:', error);
+  }
+
   };
 
   initSession();
