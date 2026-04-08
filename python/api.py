@@ -1,208 +1,117 @@
-"""
-FastAPI Backend for Quantum Tic-Tac-Toe
-Connects React frontend to quantum game engine
- Now returns x_winning_line and o_winning_line for simultaneous wins
-"""
-
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import logging
 import os
+import uuid
 
-# Import our quantum game engine
 from quantum_game import QuantumTicTacToe, create_game
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create FastAPI app
 app = FastAPI(
     title="Quantum Tic-Tac-Toe API",
     description="API for quantum tic-tac-toe game with real quantum computing",
     version="1.0.0"
 )
 
-# Enable CORS so React can talk to this API
 ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS", 
+    "ALLOWED_ORIGINS",
     "http://localhost:3000,http://localhost:3001,https://q-tic-tac-toe.vercel.app"
 ).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,  
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"], 
-    allow_headers=["Content-Type", "Authorization"], 
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # ==========================================
-# GLOBAL GAME INSTANCE
+# SESSION-BASED GAME STORAGE
 # ==========================================
-game_instance: Optional[QuantumTicTacToe] = None
+games: Dict[str, QuantumTicTacToe] = {}
 
-
-def get_game() -> QuantumTicTacToe:
-    """Get or create game instance"""
-    global game_instance
-    if game_instance is None:
-        game_instance = create_game()
-        logger.info("New game instance created")
-    return game_instance
+def get_game(session_id: str) -> QuantumTicTacToe:
+    if session_id not in games:
+        games[session_id] = create_game()
+        logger.info(f"New game created for session: {session_id}")
+    return games[session_id]
 
 
 # ==========================================
-# REQUEST/RESPONSE MODELS
+# REQUEST MODELS
 # ==========================================
 
 class QuantumMoveRequest(BaseModel):
-    """Request to make a quantum move"""
     square1: int
     square2: int
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "square1": 0,
-                "square2": 4
-            }
-        }
-
 
 class CollapseMoveRequest(BaseModel):
-    """Request to collapse quantum moves with specific squares"""
-    collapse_option: Dict[str, int]  # {"X1": 1, "O2": 5, "X3": 9}
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "collapse_option": {"X1": 1, "O1": 5}
-            }
-        }
-
-
-class GameStateResponse(BaseModel):
-    """Response with game state"""
-    success: bool
-    game_state: Dict[str, Any]
-    message: Optional[str] = None
+    collapse_option: Dict[str, int]
 
 
 # ==========================================
-# API ENDPOINTS
+# ENDPOINTS
 # ==========================================
 
 @app.get("/")
 def root():
-    """Root endpoint - API info"""
     return {
         "name": "Quantum Tic-Tac-Toe API",
         "version": "1.0.0",
-        "status": "running",
-        "endpoints": {
-            "GET /": "API info",
-            "GET /health": "Health check",
-            "POST /game/new": "Start new game",
-            "GET /game/state": "Get current game state",
-            "POST /game/move": "Make quantum move",
-            "POST /game/collapse": "Collapse quantum moves",
-            "GET /game/winner": "Check for winner"
-        }
+        "status": "running"
     }
-
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "quantum_backend": "operational"
-    }
+    return {"status": "healthy", "quantum_backend": "operational"}
 
 
 @app.post("/game/new")
-def new_game():
-    """
-    Start a new game
-    Resets the game state
-    """
-    global game_instance
-    game_instance = create_game()
-    logger.info("New game started")
-    
+def new_game(session_id: Optional[str] = Query(default=None)):
+    sid = session_id or str(uuid.uuid4())
+    games[sid] = create_game()
+    logger.info(f"New game started for session: {sid}")
     return {
         "success": True,
+        "session_id": sid,
         "message": "New game started",
-        "game_state": game_instance.get_game_state()
+        "game_state": games[sid].get_game_state()
     }
 
 
 @app.get("/game/state")
-def get_game_state():
-    """
-    Get current game state
-    Returns all moves, entanglements, board, etc.
-    """
-    game = get_game()
-    
-    return {
-        "success": True,
-        "game_state": game.get_game_state()
-    }
+def get_game_state(session_id: str = Query(...)):
+    game = get_game(session_id)
+    return {"success": True, "game_state": game.get_game_state()}
 
 
 @app.post("/game/move")
-def make_quantum_move(request: QuantumMoveRequest):
-    """
-    Make a quantum move
-    Places a quantum mark in two squares simultaneously
-    """
+def make_quantum_move(request: QuantumMoveRequest, session_id: str = Query(...)):
     try:
-        game = get_game()
-        
-        # Validate squares
+        game = get_game(session_id)
+
         if not (0 <= request.square1 <= 8 and 0 <= request.square2 <= 8):
-            raise HTTPException(
-                status_code=400,
-                detail="Squares must be between 0 and 8"
-            )
-        
+            raise HTTPException(status_code=400, detail="Squares must be between 0 and 8")
+
         if request.square1 == request.square2:
-            raise HTTPException(
-                status_code=400,
-                detail="Squares must be different"
-            )
-        
-        # Make the move
+            raise HTTPException(status_code=400, detail="Squares must be different")
+
         result = game.make_quantum_move(request.square1, request.square2)
-        
+
         if not result['success']:
-            raise HTTPException(
-                status_code=400,
-                detail=result.get('error', 'Invalid move')
-            )
-        
-        logger.info(f"Quantum move made: {request.square1}, {request.square2}")
-        
-        # ✅ If cycle detected, generate collapse options
+            return result
+
         if result.get('cycle_detected'):
-            logger.info('🌀 Cycle detected, generating collapse options...')
-            
-            # ✅ Generate 3-5 options (reasonable number)
             collapse_options = game.generate_collapse_options(max_options=4)
-            
-            logger.info(f'✅ Generated {len(collapse_options)} unique collapse options')
-            
-            # Log each option for debugging
-            for i, option in enumerate(collapse_options, 1):
-                logger.info(f'  Option {i}: {option}')
-            
             result['collapse_options'] = collapse_options
-        
+
         return result
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -211,65 +120,30 @@ def make_quantum_move(request: QuantumMoveRequest):
 
 
 @app.post("/game/collapse")
-def collapse_moves(request: CollapseMoveRequest):
-    """
-    Collapse quantum moves to chosen classical positions
-    
-    Args:
-        collapse_option: Dictionary mapping move IDs to chosen squares
-                        Example: {"X1": 1, "O2": 5, "X3": 9}
-    
-    Returns:
-        Collapse results showing final positions
-    """
+def collapse_moves(request: CollapseMoveRequest, session_id: str = Query(...)):
     try:
-        game = get_game()
-        
+        game = get_game(session_id)
+
         if not request.collapse_option:
-            raise HTTPException(
-                status_code=400,
-                detail="Must provide collapse option"
-            )
-        
-        logger.info(f"Collapsing with option: {request.collapse_option}")
-        
-        # Collapse the moves with chosen squares
+            raise HTTPException(status_code=400, detail="Must provide collapse option")
+
         result = game.collapse_with_choice(request.collapse_option)
-        
-        logger.info(f"✅ Collapse successful!")
-        logger.info(f"Results: {result['collapse_results']}")
-        
         return result
-        
+
     except Exception as e:
-        logger.error(f"❌ Error collapsing moves: {e}")
+        logger.error(f"Error collapsing moves: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/game/winner")
-def check_winner():
-    """
-    Check if there's a winner or a draw
-    Now supports simultaneous wins with scoring!
-    
-    ✅ UPDATED: Returns x_winning_line and o_winning_line for UI display
-    """
+def check_winner(session_id: str = Query(...)):
     try:
-        game = get_game()
-        
+        game = get_game(session_id)
+
         win_details = game.get_win_details()
         is_draw = game.check_for_draw()
-        
         winner = win_details['winner']
-        
-        logger.info(f"Check winner: winner={winner}, draw={is_draw}")
-        logger.info(f"Scores: X={win_details['x_score']}, O={win_details['o_score']}")
-        
-        if win_details['is_simultaneous']:
-            logger.info("⚡ SIMULTANEOUS WIN DETECTED!")
-            logger.info(f"X winning line: {win_details.get('x_winning_line')}")
-            logger.info(f"O winning line: {win_details.get('o_winning_line')}")
-        
+
         return {
             "success": True,
             "winner": winner,
@@ -277,50 +151,27 @@ def check_winner():
             "game_over": winner is not None or is_draw,
             "board": game.game_state.board,
             "winning_line": win_details.get('winning_line', []),
-            
-            # ✅ NEW: Both winning lines for simultaneous win display
             "x_winning_line": win_details.get('x_winning_line'),
             "o_winning_line": win_details.get('o_winning_line'),
-            
-            # Simultaneous win info
             "is_simultaneous": win_details['is_simultaneous'],
             "x_score": win_details['x_score'],
             "o_score": win_details['o_score'],
-            "x_wins_count": win_details.get('x_wins_count', len(win_details['x_wins'])),
-            "o_wins_count": win_details.get('o_wins_count', len(win_details['o_wins']))
+            "x_wins_count": win_details.get('x_wins_count', 0),
+            "o_wins_count": win_details.get('o_wins_count', 0)
         }
-        
+
     except Exception as e:
         logger.error(f"Error checking winner: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/game/entanglements")
-def get_entanglements():
-    """
-    Get all current entanglements
-    Useful for visualization
-    """
-    game = get_game()
-    
+def get_entanglements(session_id: str = Query(...)):
+    game = get_game(session_id)
     return {
         "success": True,
         "entanglements": [e.to_dict() for e in game.game_state.entanglements],
         "count": len(game.game_state.entanglements)
-    }
-
-
-@app.get("/game/moves")
-def get_moves():
-    """
-    Get all moves (quantum and collapsed)
-    """
-    game = get_game()
-    
-    return {
-        "success": True,
-        "moves": [m.to_dict() for m in game.game_state.moves],
-        "count": len(game.game_state.moves)
     }
 
 
@@ -330,17 +181,4 @@ def get_moves():
 
 if __name__ == "__main__":
     import uvicorn
-    
-    print("=" * 50)
-    print(" Starting Quantum Tic-Tac-Toe API Server...")
-    print("=" * 50)
-    print(" Server: http://localhost:8000")
-    print(" API Docs: http://localhost:8000/docs")
-    print(" Ready to play!\n")
-    
-    uvicorn.run(
-        app, 
-        host="0.0.0.0", 
-        port=8000,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

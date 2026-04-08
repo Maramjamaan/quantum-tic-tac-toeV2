@@ -4,11 +4,13 @@
  * This hook manages the entire game state and connects to the Python API.
  * Central state management connecting UI to API.
  */
+/* eslint-disable no-unused-vars */
 import { MIN_SQUARES_FOR_MOVE, COLLAPSE_DELAY } from '../constants/gameConstants';
 import { useState, useCallback, useEffect } from 'react';
 import { PLAYERS, GAME_STATUS, SQUARE_STATES, createGameState } from '../types/gameTypes.js';
 import { useQuantumAPI } from './useQuantumAPI.js';
 import Logger from '../utils/logger';
+import config from '../config';
 
 // ==========================================
 // HELPER FUNCTIONS
@@ -543,108 +545,68 @@ export const useGameState = () => {
   // ==========================================
 
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadGameState = async () => {
-      try {
-        const result = await api.getGameState();
-        if (result && result.success && isMounted) {
-          setApiGameState(result.game_state);
-          
-          // FIRST: Check if not enough squares on load (before checking winner)
-          const emptySquares = result.game_state.board.filter(sq => sq === null).length;
-          if (emptySquares <= 2 && emptySquares > 0) {
-            // Check if there are any uncollapsed quantum moves
-            const hasQuantumMoves = result.game_state.moves?.some(m => !m.collapsed);
-            if (!hasQuantumMoves) {
-              Logger.info('Game loaded with not enough squares - setting to DRAW');
-              setGameState(prev => ({
-                ...prev,
-                status: GAME_STATUS.DRAW,
-                winner: null
-              }));
-              return; // Don't check winner, game is already a draw
-            }
-          }
-          
-          // Check if there's already a winner on load
-          const winnerCheck = await api.checkWinner();
-          if (winnerCheck && winnerCheck.success) {
-            if (winnerCheck.winner) {
-              setGameState(prev => ({
-                ...prev,
-                status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
-                winner: winnerCheck.winner,
-                winningLine: winnerCheck.winning_line || [],
-                xWinningLine: winnerCheck.x_winning_line || [],
-                oWinningLine: winnerCheck.o_winning_line || []
-              }));
-              
-              // Also update apiGameState for simultaneous win display
-              setApiGameState(prev => ({
-                ...prev,
-                winner: winnerCheck.winner,
-                is_simultaneous: winnerCheck.is_simultaneous,
-                x_score: winnerCheck.x_score,
-                o_score: winnerCheck.o_score
-              }));
-            } else if (winnerCheck.is_draw) {
-              setGameState(prev => ({
-                ...prev,
-                status: GAME_STATUS.DRAW,
-                winner: null
-              }));
-            }
+  let isMounted = true;
+
+  const initSession = async () => {
+    try {
+      let sessionId = sessionStorage.getItem('quantum_session_id');
+
+      if (!sessionId) {
+        // جلسة جديدة
+        const res = await fetch(`${config.apiUrl}/game/new`, { method: 'POST' });
+        const data = await res.json();
+        sessionId = data.session_id;
+        sessionStorage.setItem('quantum_session_id', sessionId);
+        if (isMounted) {
+          setApiGameState(data.game_state);
+        }
+        return;
+      }
+
+      // جلسة موجودة — حمّل حالتها
+      const result = await api.getGameState();
+      if (result && result.success && isMounted) {
+        setApiGameState(result.game_state);
+
+        const emptySquares = result.game_state.board.filter(sq => sq === null).length;
+        if (emptySquares <= 2 && emptySquares > 0) {
+          const hasQuantumMoves = result.game_state.moves?.some(m => !m.collapsed);
+          if (!hasQuantumMoves) {
+            setGameState(prev => ({ ...prev, status: GAME_STATUS.DRAW, winner: null }));
+            return;
           }
         }
-      } catch (error) {
-        Logger.error('Failed to load initial game state:', error);
+
+        const winnerCheck = await api.checkWinner();
+        if (winnerCheck && winnerCheck.success) {
+          if (winnerCheck.winner) {
+            setGameState(prev => ({
+              ...prev,
+              status: winnerCheck.winner === 'X' ? GAME_STATUS.X_WINS : GAME_STATUS.O_WINS,
+              winner: winnerCheck.winner,
+              winningLine: winnerCheck.winning_line || [],
+              xWinningLine: winnerCheck.x_winning_line || [],
+              oWinningLine: winnerCheck.o_winning_line || []
+            }));
+            setApiGameState(prev => ({
+              ...prev,
+              winner: winnerCheck.winner,
+              is_simultaneous: winnerCheck.is_simultaneous,
+              x_score: winnerCheck.x_score,
+              o_score: winnerCheck.o_score
+            }));
+          } else if (winnerCheck.is_draw) {
+            setGameState(prev => ({ ...prev, status: GAME_STATUS.DRAW, winner: null }));
+          }
+        }
       }
-    };
-
-    loadGameState();
-    
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ==========================================
-  // RETURN EVERYTHING
-  // ==========================================
-
-  return {
-    // State
-    gameState,
-    apiGameState,
-    board,
-    stats,
-    selectedSquares,
-    userError,
-
-    // Actions
-    selectSquare,
-    chooseCollapse,
-    resetGame,
-    clearSelection,
-    clearError,
-    autoPlay,
-
-    // Computed properties
-    isPlaying: gameState.status === GAME_STATUS.PLAYING,
-    isWaitingCollapse: gameState.status === GAME_STATUS.WAITING_COLLAPSE,
-    isGameOver: gameState.status === GAME_STATUS.X_WINS ||
-      gameState.status === GAME_STATUS.O_WINS ||
-      gameState.status === GAME_STATUS.DRAW,
-    currentPlayer: apiGameState?.current_player || PLAYERS.X,
-    winner: gameState.winner,
-    winningLine: gameState.winningLine || [],
-    xWinningLine: gameState.xWinningLine || [],
-    oWinningLine: gameState.oWinningLine || [],
-
-    // API status
-    loading: api.loading,
-    error: api.error
+    } catch (error) {
+      Logger.error('Failed to init session:', error);
+    }
   };
+
+  initSession();
+  return () => { isMounted = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 };
