@@ -607,4 +607,30 @@ export const useGameState = () => {
   return () => { isMounted = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
-};
+  return {
+    gameState,
+    apiGameState,
+    board,
+    stats,
+    selectedSquares,
+    userError,
+    selectSquare,
+    chooseCollapse,
+    resetGame,
+    clearSelection,
+    clearError,
+    autoPlay,
+    isPlaying: gameState.status === GAME_STATUS.PLAYING,
+    isWaitingCollapse: gameState.status === GAME_STATUS.WAITING_COLLAPSE,
+    isGameOver: gameState.status === GAME_STATUS.X_WINS ||
+      gameState.status === GAME_STATUS.O_WINS ||
+      gameState.status === GAME_STATUS.DRAW,
+    currentPlayer: apiGameState?.current_player || PLAYERS.X,
+    winner: gameState.winner,
+    winningLine: gameState.winningLine || [],
+    xWinningLine: gameState.xWinningLine || [],
+    oWinningLine: gameState.oWinningLine || [],
+    loading: api.loading,
+    error: api.error
+  };  
+};  
