@@ -3,19 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Navbar from '../../Navbar/Navbar';
 import Footer from '../../Footer/Footer';
-import QuantumLogo from '../../components/QuantumLogo'
+import QuantumLogo from '../../components/QuantumLogo';
 import './HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language } = useLanguage();
+  const isAr = language === 'ar';
 
   return (
     <div className="home-page">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Floating Quantum Particles Background */}
       <div className="particles-bg">
         {[...Array(20)].map((_, i) => (
           <div key={i} className="particle" style={{
@@ -27,35 +26,32 @@ const HomePage = () => {
         ))}
       </div>
 
-      {/* Main Content */}
       <div className="home-content">
-        {/* Quantum Atom Animation */}
-        <QuantumLogo size={260} />
+        <QuantumLogo size={220} />
 
-        {/* Title */}
+        <div className="home-eyebrow">
+          {isAr ? 'مشروع تخرج' : 'Graduation Project'}
+        </div>
+
         <h1 className="home-title">
-          <span className="title-quantum">{t('home.titleQuantum')}</span>
-          <span className="title-world">{t('home.titleWorld')}</span>
+          {isAr
+            ? <><em>إكس-أو</em>{' الكمية'}</>
+            : <>{'Quantum '}<em>Tic-Tac-Toe</em></>
+          }
         </h1>
 
-        {/* Subtitle */}
         <p className="home-subtitle">
-          {t('home.subtitle')}
+          {isAr
+            ? 'أداة تعليمية تُجسّد مفاهيم الحوسبة الكمية التقنية التي ستُعيد تعريف المستحيل'
+            : 'A learning tool that makes quantum computing tangible the technology that will redefine the impossible'}
         </p>
 
-        {/* Play Button */}
-        <button 
-          className="play-button"
-          onClick={() => navigate('/game')}
-        >
-          <span className="play-text">
-            {t('home.playButton')}
-          </span>
-          <span className="play-arrow">→</span>
+        <button className="home-play-btn" onClick={() => navigate('/quantum-computing')}>
+          {isAr ? 'ابدأ من هنا' : 'Start Here'}
+          <span className="home-play-arrow">←</span>
         </button>
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   );
